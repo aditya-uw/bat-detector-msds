@@ -191,6 +191,7 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
             os.makedirs(tmp_dir)
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
         audio_files = get_files_from_dir(input_dir)
+        print(audio_files)
         comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
         df_comments = pd.DataFrame(comments)
         good_audio_files = df_comments.loc[~df_comments['RIFF:Comment'].str.contains("microphone")]['SourceFile'].values
