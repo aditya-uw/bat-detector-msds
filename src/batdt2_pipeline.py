@@ -31,9 +31,6 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
     start_time: seconds
     duration: seconds
     """
-
-    if (os.stat(audio_file).st_size == 0):
-        return []
     
     ip_audio = sf.SoundFile(audio_file)
 
@@ -83,7 +80,8 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
 def get_files_from_dir(input_dir):
     audio_files = []
     for file in sorted(list(Path(input_dir).iterdir())):
-        if (os.path.exists(file) and len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
+        if (os.path.exists(file) and not(os.stat(file).st_size == 0) and
+             len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
             audio_files.append(file)
 
     return audio_files
