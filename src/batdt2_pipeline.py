@@ -192,8 +192,8 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
         comments = exiftool.ExifToolHelper().get_tags(input_dir, tags='RIFF:Comment')
         df_comments = pd.DataFrame(comments)
-        good__audio_files = df_comments.loc[~df_comments['RIFF:Comment'].str.contains("microphone")]['SourceFile'].values
-        segmented_file_paths = generate_segmented_paths(good__audio_files, cfg)
+        good_audio_files = df_comments.loc[~df_comments['RIFF:Comment'].str.contains("microphone")]['SourceFile'].values
+        segmented_file_paths = generate_segmented_paths(good_audio_files, cfg)
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
         bd_dets = run_models(file_path_mappings, cfg, csv_name)
         delete_segments(segmented_file_paths)
