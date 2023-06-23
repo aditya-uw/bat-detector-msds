@@ -84,7 +84,7 @@ def get_files_from_dir(input_dir):
     audio_files = []
     for file in sorted(list(Path(input_dir).iterdir())):
         if (len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
-            audio_files.append(file)
+            audio_files.append(file.as_posix())
 
     return audio_files
 
@@ -136,10 +136,10 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     activity_dates = []
 
     for file in get_files_from_dir(input_dir):
-        filedets = dets.loc[dets['input_file']==file.name]
+        filedets = dets.loc[dets['input_file']==Path(file).name]
         activity = np.hstack([activity, len(filedets)])
 
-        file_dt_UTC = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
+        file_dt_UTC = dt.datetime.strptime(Path(file).name, "%Y%m%d_%H%M%S.WAV")
 
         if show_PST:
             if (file_dt_UTC.hour >= 7):
@@ -191,7 +191,6 @@ def run_pipeline(input_dir, csv_name, output_dir, tmp_dir, run_model=True, gener
             os.makedirs(tmp_dir)
         cfg = get_params(output_dir, tmp_dir, 4, 30.0)
         audio_files = get_files_from_dir(input_dir)
-        print(audio_files)
         comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
         df_comments = pd.DataFrame(comments)
         good_audio_files = df_comments.loc[~df_comments['RIFF:Comment'].str.contains("microphone")]['SourceFile'].values
