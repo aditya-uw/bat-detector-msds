@@ -83,8 +83,8 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
 def get_files_from_dir(input_dir):
     audio_files = []
     for file in sorted(list(Path(input_dir).iterdir())):
-        if (len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
-            audio_files.append(file.as_posix())
+        if (os.path.exists(file) and len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
+            audio_files.append(file)
 
     return audio_files
 
@@ -136,10 +136,10 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     activity_dates = []
 
     for file in get_files_from_dir(input_dir):
-        filedets = dets.loc[dets['input_file']==Path(file).name]
+        filedets = dets.loc[dets['input_file']==(file).name]
         activity = np.hstack([activity, len(filedets)])
 
-        file_dt_UTC = dt.datetime.strptime(Path(file).name, "%Y%m%d_%H%M%S.WAV")
+        file_dt_UTC = dt.datetime.strptime((file).name, "%Y%m%d_%H%M%S.WAV")
 
         if show_PST:
             if (file_dt_UTC.hour >= 7):
