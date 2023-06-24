@@ -88,6 +88,17 @@ def get_files_from_dir(input_dir):
 
     return audio_files
 
+def get_files_to_reference(input_dir):
+    audio_files = []
+    for file in sorted(list(Path(input_dir).iterdir())):
+        if (os.path.exists(file) and
+             len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
+            file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
+            if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
+                audio_files.append(file)
+
+    return audio_files
+
 def generate_segmented_paths(audio_files, cfg):
     segmented_file_paths = []
     for audio_file in audio_files:
@@ -136,7 +147,7 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     activity_dates = []
 
     det_times = []
-    for file in get_files_from_dir(input_dir):
+    for file in get_files_to_reference(input_dir):
         det_times.append(file.name)
     print(sorted(det_times))
 
