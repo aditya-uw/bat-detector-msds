@@ -135,6 +135,11 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     activity_times = []
     activity_dates = []
 
+    det_times = []
+    for file in get_files_from_dir(input_dir):
+        det_times.append(file.name)
+    print(sorted(det_times))
+
     for file in get_files_from_dir(input_dir):
         filedets = dets.loc[dets['input_file']==(file).name]
         activity = np.hstack([activity, len(filedets)])
