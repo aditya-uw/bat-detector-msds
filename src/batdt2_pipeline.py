@@ -78,15 +78,25 @@ def get_params(output_dir, tmp_dir, num_processes, segment_duration):
     return cfg
 
 def get_files_from_dir(input_dir):
+    audio_files = []
     good_audio_files = []
     for file in sorted(list(Path(input_dir).iterdir())):
         if (os.path.exists(file) and not(os.stat(file).st_size == 0) and
              len(file.name.split('.')) == 2 and (file.name.split('.')[1]=="WAV" or file.name.split('.')[1]=="wav")):
             file_dt = dt.datetime.strptime(file.name, "%Y%m%d_%H%M%S.WAV")
             if ((file_dt.minute == 30 or file_dt.minute == 0) and file_dt.second == 0):
-                comments = exiftool.ExifToolHelper().get_tags(file, tags='RIFF:Comment')
-                if (not("microphone" in comments[0]['RIFF:Comment'])):
-                    good_audio_files.append(Path(comments[0]['SourceFile']))
+                audio_files.append(file)
+                # comments = exiftool.ExifToolHelper().get_tags(file, tags='RIFF:Comment')
+                # if (not("microphone" in comments[0]['RIFF:Comment'])):
+                #     good_audio_files.append(Path(comments[0]['SourceFile']))
+                #    
+    comments = exiftool.ExifToolHelper().get_tags(audio_files, tags='RIFF:Comment')
+    df_comments = pd.DataFrame(comments)
+    good_audio_files = df_comments.loc[~df_comments['RIFF:Comment'].str.contains("microphone")]['SourceFile'].values
+
+    for i in range(len(good_audio_files)):
+        good_audio_files[i] = Path(good_audio_files[i])
+                
     return good_audio_files
 
 def get_files_to_reference(input_dir):
@@ -146,20 +156,22 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     activity = np.array([])
     activity_times = []
     activity_dates = []
+    good_audio_files = get_files_from_dir(input_dir)
+    ref_audio_files = get_files_to_reference(input_dir)
 
     det_times = []
-    for file in get_files_to_reference(input_dir):
+    for file in ref_audio_files:
         det_times.append(file.name)
     print(sorted(det_times))
 
     det_times = []
-    for file in get_files_from_dir(input_dir):
+    for file in good_audio_files:
         det_times.append(file.name)
     print(sorted(det_times))
 
-    for file in get_files_to_reference(input_dir):
+    for file in ref_audio_files:
         filedets = dets.loc[dets['input_file']==(file).name]
-        if file in get_files_from_dir(input_dir):
+        if file in good_audio_files:
             activity = np.hstack([activity, len(filedets)])
         else:
             activity = np.hstack([activity, -1])
