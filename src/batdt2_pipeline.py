@@ -159,16 +159,6 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     good_audio_files = get_files_from_dir(input_dir)
     ref_audio_files = get_files_to_reference(input_dir)
 
-    det_times = []
-    for file in ref_audio_files:
-        det_times.append(file.name)
-    print(sorted(det_times))
-
-    det_times = []
-    for file in good_audio_files:
-        det_times.append(file.name)
-    print(sorted(det_times))
-
     for file in ref_audio_files:
         filedets = dets.loc[dets['input_file']==(file).name]
         if file in good_audio_files:
