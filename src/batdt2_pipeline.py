@@ -162,9 +162,9 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     for file in ref_audio_files:
         filedets = dets.loc[dets['input_file']==(file).name]
         if file in good_audio_files:
-            activity = np.hstack([activity, len(filedets)])
+            activity = np.hstack([activity, len(filedets) - 1])
         else:
-            activity = np.hstack([activity, -1])
+            activity = np.hstack([activity, -2])
 
         file_dt_UTC = dt.datetime.strptime((file).name, "%Y%m%d_%H%M%S.WAV")
 
