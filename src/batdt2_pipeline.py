@@ -162,9 +162,9 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     for file in ref_audio_files:
         filedets = dets.loc[dets['input_file']==(file).name]
         if file in good_audio_files:
-            activity = np.hstack([activity, len(filedets) - 1])
+            activity = np.hstack([activity, len(filedets) + 1])
         else:
-            activity = np.hstack([activity, -2])
+            activity = np.hstack([activity, 0])
 
         file_dt_UTC = dt.datetime.strptime((file).name, "%Y%m%d_%H%M%S.WAV")
 
@@ -188,10 +188,14 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
     
     activity = activity.reshape((len(activity_dates), len(activity_times))).T
 
+    masked_array_for_nodets = np.ma.masked_where(activity==0, activity)
+    cmap = plt.get_cmap('viridis')
+    cmap.set_bad(color='red', alpha=0.9)
+
     plt.rcParams.update({'font.size': 16})
     plt.figure(figsize=(12, 8))
     plt.title(f"Activity from {site_name}", loc='left', y=1.05)
-    plt.imshow(activity+1, norm=colors.LogNorm(vmin=1, vmax=10e3))
+    plt.imshow(masked_array_for_nodets, cmap=cmap, norm=colors.LogNorm(vmin=1, vmax=10e3))
     plt.yticks(np.arange(0, len(activity_times), 2)-0.5, activity_times[::2], rotation=50)
     plt.xticks(np.arange(0, len(activity_dates))-0.5, activity_dates, rotation=50)
     plt.ylabel('UTC Time (HH:MM)')
