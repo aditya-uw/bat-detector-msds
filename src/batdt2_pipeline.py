@@ -190,7 +190,7 @@ def plot_dets_as_activity_grid(input_dir, csv_name, output_dir, site_name, show_
 
     masked_array_for_nodets = np.ma.masked_where(activity==0, activity)
     cmap = plt.get_cmap('viridis')
-    cmap.set_bad(color='red', alpha=0.9)
+    cmap.set_bad(color='red')
 
     plt.rcParams.update({'font.size': 16})
     plt.figure(figsize=(12, 8))
