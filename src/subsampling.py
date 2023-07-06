@@ -33,7 +33,7 @@ def subsample_withpaths(segmented_file_paths, cfg, cycle_length, percent_on):
 
     return necessary_paths
 
-def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, times, cycle_length, p_on, be_subplot=False, show_PST=False, show_legend=False, show_threshold=False, lf_threshold=40000, hf_threshold=40000, show_num_dets=False, det_linewidth=2, show_audio=False, show_spectrogram=True, spec_cmap='ocean', rm_dB = 200, save=False):
+def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, times, cycle_length, p_on, be_subplot=False, show_PST=False, show_legend=False, show_threshold=False, lf_threshold=40000, hf_threshold=40000, show_num_dets=False, det_linewidth=2, show_audio=False, show_spectrogram=True, spec_cmap='ocean', spec_NFFT = 256, rm_dB = 200, save=False):
     ## Strip the datetime for year, month, date, and hour from filename
     hour = int(filename[9:11])
     if (show_PST):
@@ -41,9 +41,8 @@ def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, tim
             hour = hour - 7
         else:
             hour = 24 + hour - 7
-    zero_pad_hour = str(hour).zfill(1)
+    zero_pad_hour = str(hour).zfill(2)
     file_dt = dt.datetime.strptime(f'{filename[:9]}{zero_pad_hour}{int(offset/60)%60}{int(offset%60)}', '%Y%m%d_%H%M%S')
-    print(file_dt)
 
     ## Only find numPoints amount of labels from all available seconds
     numPoints = 11
@@ -127,7 +126,7 @@ def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, tim
             plt.figure(figsize=(18, 4))
             plt.title(f"{file_dt.date()} in {location} | {cycle_length//60}-min, {100*p_on:.1f}% Duty Cycle")
     if (show_spectrogram):
-        plt.specgram(audio_sec, Fs=fs, cmap=spec_cmap, vmin=vmin)
+        plt.specgram(audio_sec, NFFT=spec_NFFT, Fs=fs, cmap=spec_cmap, vmin=vmin)
     plt.xlim((0, s_ticks[-1]))
     plt.ylabel("Frequency (kHz)", fontsize=ylabel_fontsize)
     plt.xticks(ticks=s_ticks, labels=time_labels)
@@ -146,7 +145,7 @@ def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, tim
     f_ticks = f_ticks[f_ticks <= fs/2]
     plt.yticks(ticks=f_ticks, labels=(f_ticks/1000).astype('int16'))
     ax = plt.gca()
-    num_dets = 1
+    num_dets = 0
     for i in range(len(xs_inds)):
         rect = patches.Rectangle((xs_inds[i], xs_freqs[i]), 
                         x_durations[i], x_bandwidths[i], 
