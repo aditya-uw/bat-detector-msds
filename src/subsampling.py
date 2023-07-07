@@ -33,6 +33,99 @@ def subsample_withpaths(segmented_file_paths, cfg, cycle_length, percent_on):
 
     return necessary_paths
 
+def get_dets_from_csv_files(date, location):
+    dets1 = pd.read_csv(f"../output_dir/1min_every_6min__{location.split()[0]}_{date}_030000to130000.csv")
+    dets2 = pd.read_csv(f"../output_dir/5min_every_30min__{location.split()[0]}_{date}_030000to130000.csv")
+    c_dets = pd.read_csv(f"../output_dir/continuous__{location.split()[0]}_{date}_030000to130000.csv")
+
+    return c_dets, dets1, dets2
+
+def get_dets_lfdets_and_hfdets(dets, filename):
+    detects = dets[dets['input_file']==filename]
+    lfdetects = detects[detects["high_freq"] < 45000]
+    hfdetects = detects[detects["low_freq"] > 35000]
+
+    return detects, lfdetects, hfdetects
+
+def add_num_to_buckets(bucket1, bucket2, bucket3, num1, num2, num3):
+    bucket1 = np.hstack([bucket1, [num1]])
+    bucket2 = np.hstack([bucket2, [num2]])
+    bucket3 = np.hstack([bucket3, [num3]])
+
+    return bucket1, bucket2, bucket3
+
+def get_presence_from_numdets(num_dets, num_lfdets, num_hfdets, presence_threshold):
+    presence = np.ones(num_dets.shape[0])
+    presence[num_dets < presence_threshold] = 0
+    lfpresence = np.ones(num_lfdets.shape[0])
+    lfpresence[num_lfdets < presence_threshold] = 0
+    hfpresence = np.ones(num_hfdets.shape[0])
+    hfpresence[num_hfdets < presence_threshold] = 0
+
+    return presence, lfpresence, hfpresence
+
+def get_metrics_from_day(date, location, labels, presence_threshold, scheme=0):
+    num_dets = np.array([])
+    num_lfdets = np.array([])
+    num_hfdets = np.array([])
+
+    dets = get_dets_from_csv_files(date, location)[scheme]
+
+    for label in labels:
+        if (label.split('_')[0] == date):
+            detects, lfdetects, hfdetects = get_dets_lfdets_and_hfdets(dets, label)
+            num_dets, num_lfdets, num_hfdets = add_num_to_buckets(num_dets, num_lfdets, num_hfdets, 
+                                                                    detects.shape[0], lfdetects.shape[0], hfdetects.shape[0])
+
+    presence, lfpresence, hfpresence = get_presence_from_numdets(num_dets, num_lfdets, num_hfdets, presence_threshold)
+
+    return presence, lfpresence, hfpresence, num_dets, num_lfdets, num_hfdets
+
+def get_metrics_over_days(dates, location, labels, presence_threshold, scheme=0):
+    presence_over_days = np.array([])
+    lfpresence_over_days = np.array([])
+    hfpresence_over_days = np.array([])
+
+    numdets_over_days = np.array([])
+    lfnumdets_over_days = np.array([])
+    hfnumdets_over_days = np.array([])
+
+    for i, f_date in enumerate(dates):
+        presence, lfpresence, hfpresence, num_dets, num_lfdets, num_hfdets = get_metrics_from_day(f_date, location, labels, presence_threshold, scheme)
+
+        if (i==0):
+            presence_over_days = np.hstack((presence_over_days, presence))
+            lfpresence_over_days = np.hstack((lfpresence_over_days, lfpresence))
+            hfpresence_over_days = np.hstack((hfpresence_over_days, hfpresence))
+
+            numdets_over_days = np.hstack((numdets_over_days, num_dets))
+            lfnumdets_over_days = np.hstack((lfnumdets_over_days, num_lfdets))
+            hfnumdets_over_days = np.hstack((hfnumdets_over_days, num_hfdets))
+        else:
+            presence_over_days = np.vstack((presence_over_days, presence))
+            lfpresence_over_days = np.vstack((lfpresence_over_days, lfpresence))
+            hfpresence_over_days = np.vstack((hfpresence_over_days, hfpresence))
+
+            numdets_over_days = np.vstack((numdets_over_days, num_dets))
+            lfnumdets_over_days = np.vstack((lfnumdets_over_days, num_lfdets))
+            hfnumdets_over_days = np.vstack((hfnumdets_over_days, num_hfdets))
+  
+    if (len(presence_over_days.shape) == 1):  
+        presence_over_days = presence_over_days.reshape((1, 21))
+    if (len(lfpresence_over_days.shape) == 1): 
+        lfpresence_over_days = lfpresence_over_days.reshape((1, 21))
+    if (len(hfpresence_over_days.shape) == 1): 
+        hfpresence_over_days = hfpresence_over_days.reshape((1, 21))
+
+    if (len(numdets_over_days.shape) == 1):  
+        numdets_over_days = numdets_over_days.reshape((1, 21))
+    if (len(lfnumdets_over_days.shape) == 1): 
+        lfnumdets_over_days = lfnumdets_over_days.reshape((1, 21))
+    if (len(hfnumdets_over_days.shape) == 1): 
+        hfnumdets_over_days = hfnumdets_over_days.reshape((1, 21))
+
+    return presence_over_days, lfpresence_over_days, hfpresence_over_days, numdets_over_days, lfnumdets_over_days, hfnumdets_over_days
+
 def plt_msds_fromdf(location, filename, df, audio_sec, fs, offset, reftimes, times, cycle_length, p_on, be_subplot=False, show_PST=False, show_legend=False, show_threshold=False, lf_threshold=40000, hf_threshold=40000, show_num_dets=False, det_linewidth=2, show_audio=False, show_spectrogram=True, spec_cmap='ocean', spec_NFFT = 256, rm_dB = 200, save=False):
     ## Strip the datetime for year, month, date, and hour from filename
     hour = int(filename[9:11])
