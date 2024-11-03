@@ -104,6 +104,11 @@ if __name__ == '__main__':
     print(f"Generating detections for {input_file.name}")
     segmented_file_paths = batdetect2_pipeline.generate_segmented_paths([input_file], cfg)
     file_path_mappings = batdetect2_pipeline.initialize_mappings(segmented_file_paths, cfg)
+
+    start = time.time()
+    bd_dets = run_models(file_path_mappings)
+    end = time.time()
+    print(f'Baseline time: {end-start}')
     
     input = file_path_mappings[:4]
     for i in np.arange(multiprocessing.cpu_count()):
