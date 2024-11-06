@@ -95,14 +95,12 @@ def _apply_models(cfg, audio_segments):
     return csv_names
 
 if __name__ == '__main__':
-    multiprocessing.set_start_method('spawn')
     input_file = Path(f'{Path(__file__).parent}/../../Downloads/recover-20220728/Carp/20220728_080000.WAV')
 
     cfg = get_config()
     cfg['audio_file'] = input_file
     cfg['tmp_dir'] = Path('../output')
     cfg['output_dir'] = Path('../output_dir')
-    cfg['num_processes'] = 16
     cfg['should_csv'] = False
     cfg['save'] = True
 
@@ -116,19 +114,17 @@ if __name__ == '__main__':
     segmented_file_paths = batdetect2_pipeline.generate_segmented_paths([input_file], cfg)
     file_path_mappings = batdetect2_pipeline.initialize_mappings(segmented_file_paths, cfg)
     input = file_path_mappings[:]
-    num_rows = min(len(input), multiprocessing.cpu_count())
+    num_rows = multiprocessing.cpu_count()
     num_cols = multiprocessing.cpu_count()
     time_taken_test3 = np.zeros((num_rows, num_cols))
     for i in range(num_rows):
+        num_processes = int(i+1)
+        if num_processes!=1:
+            torch.set_num_threads(1)
         for j in range(num_cols):
-            num_processes = int(i+1)
-            default_num_threads_per_processor = torch.get_num_threads() # np.floor(multiprocessing.cpu_count()/num_processes).astype(int)
-            num_threads_per_processor = np.floor(multiprocessing.cpu_count()/num_processes).astype(int)
-            if num_threads_per_processor!=default_num_threads_per_processor:
-                torch.set_num_threads(num_threads_per_processor)
             pool = multiprocessing.Pool(processes=num_processes)
             chunksize_custom = int(j+1)
-            print(f'Parsing {len(input)} chunks with {num_processes} processors and {chunksize_custom} chunksize and {num_threads_per_processor} threads per processor')
+            print(f'Parsing {len(input)} chunks with {num_processes} processors and {chunksize_custom} chunksize and {torch.get_num_threads()} threads per processor')
             start = time.time()
             results = tqdm(pool.imap(_apply_model, input, chunksize=chunksize_custom), 
                             desc=f"Applying BatDetect2", total=len(input),)
@@ -137,13 +133,14 @@ if __name__ == '__main__':
             end = time.time()
             time_taken_test3[i,j] = end-start
 
-    plt.figure(figsize=(8,6))
-    plt.title(f'{len(input)} segments fixed; num_threads=1')
-    plt.imshow(time_taken_test3)
-    plt.ylabel('Num_processes (processors assigned)')
-    plt.xlabel('Chunksize (chunks per processor)')
-    plt.yticks(np.arange(num_rows)-0.5, np.arange(num_rows)+1)
-    plt.xticks(np.arange(num_cols)-0.5, np.arange(num_cols)+1)
-    plt.grid(which='both')
-    plt.colorbar(label='Time taken (s)')
-    plt.savefig(f'20241105__large_instance_single_file_computation.png')
+            plt.figure(figsize=(8,6))
+            plt.title(f'{len(input)} segments fixed; num_threads=1')
+            plt.imshow(time_taken_test3)
+            plt.ylabel('Num_processes (processors assigned)')
+            plt.xlabel('Chunksize (chunks per processor)')
+            plt.yticks(np.arange(num_rows)-0.5, np.arange(num_rows)+1)
+            plt.xticks(np.arange(num_cols)-0.5, np.arange(num_cols)+1)
+            plt.grid(which='both')
+            plt.colorbar(label='Time taken (s)')
+            plt.savefig(f'20241105__large_instance_single_file_{len(input)}_{num_cols}x{num_rows}_computation.png', bbox_inches='tight')
+            plt.show()
