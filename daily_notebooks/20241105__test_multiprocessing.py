@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 import time
 
+import matplotlib.pyplot as plt
+
 import sys
 
 # append the path of the
@@ -93,7 +95,7 @@ def _apply_models(cfg, audio_segments):
     return csv_names
 
 if __name__ == '__main__':
-    # multiprocessing.set_start_method('spawn')
+    multiprocessing.set_start_method('spawn')
     input_file = Path(f'{Path(__file__).parent}/../../Downloads/recover-20220728/Carp/20220728_080000.WAV')
 
     cfg = get_config()
@@ -113,20 +115,35 @@ if __name__ == '__main__':
     print(f"Generating detections for {input_file.name}")
     segmented_file_paths = batdetect2_pipeline.generate_segmented_paths([input_file], cfg)
     file_path_mappings = batdetect2_pipeline.initialize_mappings(segmented_file_paths, cfg)
+    input = file_path_mappings[:]
+    num_rows = min(len(input), multiprocessing.cpu_count())
+    num_cols = multiprocessing.cpu_count()
+    time_taken_test3 = np.zeros((num_rows, num_cols))
+    for i in range(num_rows):
+        for j in range(num_cols):
+            num_processes = int(i+1)
+            default_num_threads_per_processor = torch.get_num_threads() # np.floor(multiprocessing.cpu_count()/num_processes).astype(int)
+            num_threads_per_processor = np.floor(multiprocessing.cpu_count()/num_processes).astype(int)
+            if num_threads_per_processor!=default_num_threads_per_processor:
+                torch.set_num_threads(num_threads_per_processor)
+            pool = multiprocessing.Pool(processes=num_processes)
+            chunksize_custom = int(j+1)
+            print(f'Parsing {len(input)} chunks with {num_processes} processors and {chunksize_custom} chunksize and {num_threads_per_processor} threads per processor')
+            start = time.time()
+            results = tqdm(pool.imap(_apply_model, input, chunksize=chunksize_custom), 
+                            desc=f"Applying BatDetect2", total=len(input),)
+            bd_preds = gen_empty_df() 
+            bd_preds = pd.concat(results, ignore_index=True)
+            end = time.time()
+            time_taken_test3[i,j] = end-start
 
-    start = time.time()
-    bd_dets = run_models(file_path_mappings)
-    end = time.time()
-    print(f'Baseline time: {end-start}')
-    
-    torch.set_num_threads(1)
-    with multiprocessing.Pool(processes=cfg['num_processes']) as pool:
-        chunksize_custom = 1
-        print(f"Parsing {len(file_path_mappings)} chunks with {cfg['num_processes']} processors and {chunksize_custom} chunks per processor")
-        start = time.time()
-        results = tqdm(pool.imap(_apply_model, file_path_mappings, chunksize=chunksize_custom), 
-                    desc=f"Applying BatDetect2", total=len(file_path_mappings),)
-        bd_preds = gen_empty_df() 
-        bd_preds = pd.concat(results, ignore_index=True)
-        end = time.time()
-        print(f'Time taken: {end-start}s')
+    plt.figure(figsize=(8,6))
+    plt.title(f'{len(input)} segments fixed; num_threads=1')
+    plt.imshow(time_taken_test3)
+    plt.ylabel('Num_processes (processors assigned)')
+    plt.xlabel('Chunksize (chunks per processor)')
+    plt.yticks(np.arange(num_rows)-0.5, np.arange(num_rows)+1)
+    plt.xticks(np.arange(num_cols)-0.5, np.arange(num_cols)+1)
+    plt.grid(which='both')
+    plt.colorbar(label='Time taken (s)')
+    plt.savefig(f'20241105__large_instance_single_file_computation.png')
