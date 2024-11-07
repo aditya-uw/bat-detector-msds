@@ -34,8 +34,7 @@ import bat_detect.utils.audio_utils as au
 import bat_detect.utils.detector_utils as du
 import bat_detect.utils.wavfile as wavfile
 
-
-def generate_segments(audio_file: Path, output_dir: Path, start_time: float, duration: float):
+def generate_segments(package_to_chunk):
     """
     Segments audio file into clips of duration length and saves them to output/tmp folder.
     Allows detection model to be run on segments instead of entire file as recommended.
@@ -61,13 +60,13 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
     """
     
     fs = fsspec.filesystem('s3', anon=True, client_kwargs={'endpoint_url': 'https://sdsc.osn.xsede.org'})
-    file = fs.open(path=audio_file)
+    file = fs.open(path=package_to_chunk['audio_file'])
     ip_audio = sf.SoundFile(file)
 
     sampling_rate = ip_audio.samplerate
     # Convert to sampled units
-    ip_start = int(start_time * sampling_rate)
-    ip_duration = int(duration * sampling_rate)
+    ip_start = int(package_to_chunk['start_time'] * sampling_rate)
+    ip_duration = int(package_to_chunk['segment_duration'] * sampling_rate)
     ip_end = ip_audio.frames
 
     output_files = []
@@ -77,28 +76,27 @@ def generate_segments(audio_file: Path, output_dir: Path, start_time: float, dur
         sub_end = np.minimum(sub_start + ip_duration, ip_end)
 
         # For file names, convert back to seconds 
-        op_file = audio_file.name.replace(" ", "_")
+        op_file = package_to_chunk['audio_file'].name.replace(" ", "_")
         start_seconds =  sub_start / sampling_rate
         end_seconds =  sub_end / sampling_rate
         op_file_en = "__{:.2f}".format(start_seconds) + "_" + "{:.2f}".format(end_seconds)
         op_file = op_file[:-4] + op_file_en + ".wav"
         
-        op_path = output_dir / op_file
-        
-        sub_length = ip_duration
-        ip_audio.seek(sub_start)
-        op_audio = ip_audio.read(sub_length, dtype='float32')
+        op_path = package_to_chunk['tmp_dir'] / op_file
         output_files.append({
-            "input_filepath": audio_file,
-            "audio_file": op_path,
-            "audio_data":op_audio,
-            "audio_sampling_rate":sampling_rate,
-            "offset":  start_time + (sub_start/sampling_rate),
+            "input_filepath": package_to_chunk['audio_file'],
+            "audio_file": op_path, 
+            "offset":  package_to_chunk['start_time'] + (sub_start/sampling_rate),
         })
+        
+        sub_length = sub_end - sub_start
+        ip_audio.seek(sub_start)
+        op_audio = ip_audio.read(sub_length)
+        sf.write(op_path, op_audio, sampling_rate, subtype='PCM_16')
         
     return output_files 
 
-def generate_segmented_paths(audio_files, cfg):
+def generate_segmented_paths(packages_to_chunk):
     """
     Generates and returns a list of segments using provided cfg parameters for each audio file in audio_files.
 
@@ -120,21 +118,17 @@ def generate_segmented_paths(audio_files, cfg):
     """
 
     segmented_file_paths = []
-    for audio_file in audio_files:
-        segmented_file_paths += generate_segments(
-            audio_file = audio_file, 
-            output_dir = cfg['tmp_dir'],
-            start_time = cfg['start_time'],
-            duration   = cfg['segment_duration'],
-        )
+    for package_to_chunk in tqdm(packages_to_chunk, desc="Segmenting Files"):
+        segmented_file_paths += generate_segments(package_to_chunk)
     return segmented_file_paths
 
-def load_audio_file(file_info, time_exp_fact, target_samp_rate, scale=False, max_duration=False):
+def load_audio_file(audio_file, time_exp_fact, target_samp_rate, scale=False, max_duration=False):
     with warnings.catch_warnings():
         warnings.filterwarnings('ignore', category=wavfile.WavFileWarning)
         #sampling_rate, audio_raw = wavfile.read(audio_file)
-        audio_raw = file_info['audio_seg']['audio_data']
-        sampling_rate = file_info['audio_seg']['audio_sampling_rate']
+        audio_raw, sampling_rate = librosa.load(audio_file, sr=None)
+        # audio_raw = file_info['audio_seg']['audio_data']
+        # sampling_rate = file_info['audio_seg']['audio_sampling_rate']
 
     if len(audio_raw.shape) > 1:
         raise Exception('Currently does not handle stereo files')
@@ -158,7 +152,7 @@ def load_audio_file(file_info, time_exp_fact, target_samp_rate, scale=False, max
 
     return sampling_rate, audio_raw
 
-def process_file(file_info, model, params, args, time_exp=None, top_n=5, return_raw_preds=False, max_duration=False):
+def process_file(audio_file, model, params, args, time_exp=None, top_n=5, return_raw_preds=False, max_duration=False):
 
     # store temporary results here
     predictions = []
@@ -173,7 +167,7 @@ def process_file(file_info, model, params, args, time_exp=None, top_n=5, return_
     params['detection_threshold'] = args['detection_threshold']
 
     # load audio file
-    sampling_rate, audio_full = load_audio_file(file_info, time_exp,
+    sampling_rate, audio_full = load_audio_file(audio_file, time_exp,
                                    params['target_samp_rate'], params['scale_raw_audio'])
 
     # clipping maximum duration
@@ -228,7 +222,7 @@ def process_file(file_info, model, params, args, time_exp=None, top_n=5, return_
                 spec_slices.extend(feats.extract_spec_slices(spec_np, pred_nms, params))
 
     # convert the predictions into output dictionary
-    file_id = os.path.basename(file_info['audio_seg']['audio_file'])
+    file_id = os.path.basename(audio_file)
     predictions, spec_feats, cnn_feats, spec_slices =\
               du.merge_results(predictions, spec_feats, cnn_feats, spec_slices)
     results = du.convert_results(file_id, time_exp, duration_full, params,
@@ -318,7 +312,7 @@ def load_model(model_path, load_weights=True):
 
     return model, params
 
-def _run_batdetect(model_obj, file_mapping): #
+def _run_batdetect(model_obj, audio_file): #
     """
     Parameters:: 
         audio_file: a path containing the post-processed wav file.
@@ -332,7 +326,7 @@ def _run_batdetect(model_obj, file_mapping): #
     sys.stdout = text_trap
 
     model_output = process_file(
-        file_info=file_mapping, 
+        audio_file=audio_file, 
         model=model, 
         params=params, 
         args= {
@@ -347,7 +341,7 @@ def _run_batdetect(model_obj, file_mapping): #
     )
     # Restore stdout
     sys.stdout = sys.__stdout__
-
+    
     annotations = model_output['pred_dict']['annotation']
 
     out_df = gen_empty_df()
@@ -376,7 +370,7 @@ def apply_model(file_mapping):
         - Events are always "Echolocation" as we are using a model that only detects search-phase calls.
     """
 
-    bd_dets = _run_batdetect(file_mapping['model'], file_mapping)
+    bd_dets = _run_batdetect(file_mapping['model'], file_mapping['audio_seg']['audio_file'])
     corrected_bd_dets = pipeline._correct_annotation_offsets(
                                                             bd_dets,
                                                             file_mapping['original_file_name'],
@@ -389,11 +383,14 @@ if __name__ == '__main__':
     ## grabbed from the rclone config file
     fs = fsspec.filesystem('s3', anon=True, client_kwargs={'endpoint_url': 'https://sdsc.osn.xsede.org'})
 
-    tag1 = "bio230143-bucket01/ubna_data_01/recover-20220728/UBNA_007/2022*_0[2|3|4|5|6|7|8|9]*00.WAV"
-    group1 = fs.glob(path=tag1)
-    tag2 = "bio230143-bucket01/ubna_data_01/recover-20220728/UBNA_007/2022*_1[0|1|2|3]*00.WAV"
-    group2 = fs.glob(path=tag2)
-    selected_files = sorted(group1+group2)
+    tag = "bio230143-bucket01/ubna_data_01/recover-20220728/UBNA_007/2022*.WAV"
+    group = fs.glob(path=tag)
+    selected_files = sorted(group)
+    # tag1 = "bio230143-bucket01/ubna_data_01/recover-20220728/UBNA_007/2022*_0[2|3|4|5|6|7|8|9]*00.WAV"
+    # group1 = fs.glob(path=tag1)
+    # tag2 = "bio230143-bucket01/ubna_data_01/recover-20220728/UBNA_007/2022*_1[0|1|2|3]*00.WAV"
+    # group2 = fs.glob(path=tag2)
+    # selected_files = sorted(group1+group2)
     selected_wav_paths = list(map(Path, selected_files))
 
     cfg = get_config()
@@ -409,7 +406,26 @@ if __name__ == '__main__':
 
     print(f'generating segments in {cfg["tmp_dir"]}')
     start1 = time.time()
-    segmented_file_paths = generate_segmented_paths(selected_wav_paths[:12], cfg)
+    packages_to_chunk = []
+    for path in selected_wav_paths:
+        chunk_instructions_and_files = dict()
+        chunk_instructions_and_files['audio_file'] = path
+        chunk_instructions_and_files['tmp_dir'] = cfg['tmp_dir']
+        chunk_instructions_and_files['start_time'] = cfg['start_time']
+        chunk_instructions_and_files['segment_duration'] = cfg['segment_duration']
+        packages_to_chunk+=[chunk_instructions_and_files]
+
+    # segmented_file_paths = []
+    # for package in tqdm(packages_to_chunk, desc="Segmenting Files"):
+    #     segmented_file_paths+=[generate_segments(package)]
+
+    num_processes = 16
+    torch.set_num_threads(4)
+    ctx = multiprocessing.get_context("spawn")
+    pool = ctx.Pool(processes=num_processes)
+    segmented_file_paths = (tqdm(pool.imap(generate_segments, packages_to_chunk, chunksize=1), 
+                    desc=f"Segmenting Files", total=len(packages_to_chunk),))
+    segmented_file_paths = list(segmented_file_paths)
     file_path_mappings = batdetect2_pipeline.initialize_mappings(segmented_file_paths, cfg)
     end1 = time.time()
     print(f'Time taken to generate segments {end1-start1}')
@@ -434,14 +450,3 @@ if __name__ == '__main__':
     print(f'Parallel BatDetect2 time: {end2-start2}')
 
     print(f'Total pipeline time: {end2-start1}')
-    # plt.figure(figsize=(8,6))
-    # plt.title(f'{len(input)} segments fixed; num_threads=1')
-    # plt.imshow(time_taken_test3/60)
-    # plt.ylabel('Num_processes (processors assigned)')
-    # plt.xlabel('Chunksize (chunks per processor)')
-    # plt.yticks(np.arange(num_rows)-0.5, np.arange(num_rows)+1)
-    # plt.xticks(np.arange(num_cols)-0.5, np.arange(num_cols)+1)
-    # plt.grid(which='both')
-    # plt.colorbar(label='Time taken (min)')
-    # plt.savefig(f'20241105__2xl_instance_single_file_{len(input)}_{num_cols}x{num_rows}_computation.png', bbox_inches='tight')
-    # plt.close()
