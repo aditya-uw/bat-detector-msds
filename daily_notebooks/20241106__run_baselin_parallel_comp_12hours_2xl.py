@@ -55,41 +55,42 @@ def generate_segments(package_to_chunk):
         - The offset of each generated segment of the given audio file will be stored in this list.
         - Both items are stored in a dict{} for each generated segment.
     """
-    
-    fs = fsspec.filesystem('s3', anon=True, client_kwargs={'endpoint_url': 'https://sdsc.osn.xsede.org'})
-    file = fs.open(path=package_to_chunk['audio_file'])
-    ip_audio = sf.SoundFile(file)
-
-    sampling_rate = ip_audio.samplerate
-    # Convert to sampled units
-    ip_start = int(package_to_chunk['start_time'] * sampling_rate)
-    ip_duration = int(package_to_chunk['segment_duration'] * sampling_rate)
-    ip_end = ip_audio.frames
 
     output_files = []
+    fs = fsspec.filesystem('s3', anon=True, client_kwargs={'endpoint_url': 'https://sdsc.osn.xsede.org'})
+    file = fs.open(path=package_to_chunk['audio_file'])
+    if file.details['size']>0:
+        ip_audio = sf.SoundFile(file)
 
-    # for the length of the duration, process the audio into duration length clips
-    for sub_start in range(ip_start, ip_end, ip_duration):
-        sub_end = np.minimum(sub_start + ip_duration, ip_end)
+        sampling_rate = ip_audio.samplerate
+        # Convert to sampled units
+        ip_start = int(package_to_chunk['start_time'] * sampling_rate)
+        ip_duration = int(package_to_chunk['segment_duration'] * sampling_rate)
+        ip_end = ip_audio.frames
 
-        # For file names, convert back to seconds 
-        op_file = package_to_chunk['audio_file'].name.replace(" ", "_")
-        start_seconds =  sub_start / sampling_rate
-        end_seconds =  sub_end / sampling_rate
-        op_file_en = "__{:.2f}".format(start_seconds) + "_" + "{:.2f}".format(end_seconds)
-        op_file = op_file[:-4] + op_file_en + ".wav"
-        
-        op_path = package_to_chunk['tmp_dir'] / op_file
-        output_files.append({
-            "input_filepath": package_to_chunk['audio_file'],
-            "audio_file": op_path, 
-            "offset":  package_to_chunk['start_time'] + (sub_start/sampling_rate),
-        })
-        
-        sub_length = sub_end - sub_start
-        ip_audio.seek(sub_start)
-        op_audio = ip_audio.read(sub_length)
-        sf.write(op_path, op_audio, sampling_rate, subtype='PCM_16')
+        # for the length of the duration, process the audio into duration length clips
+        for sub_start in range(ip_start, ip_end, ip_duration):
+            sub_end = np.minimum(sub_start + ip_duration, ip_end)
+
+            # For file names, convert back to seconds 
+            op_file = package_to_chunk['audio_file'].name.replace(" ", "_")
+            start_seconds =  sub_start / sampling_rate
+            end_seconds =  sub_end / sampling_rate
+            op_file_en = "__{:.2f}".format(start_seconds) + "_" + "{:.2f}".format(end_seconds)
+            op_file = op_file[:-4] + op_file_en + ".wav"
+            
+            op_path = package_to_chunk['tmp_dir'] / op_file
+            output_files.append({
+                "input_filepath": package_to_chunk['audio_file'],
+                "audio_file": op_path, 
+                "offset":  package_to_chunk['start_time'] + (sub_start/sampling_rate),
+            })
+            
+            if (not(op_path.exists())):
+                sub_length = sub_end - sub_start
+                ip_audio.seek(sub_start)
+                op_audio = ip_audio.read(sub_length)
+                sf.write(op_path, op_audio, sampling_rate, subtype='PCM_16')
         
     return output_files 
 
@@ -416,13 +417,13 @@ if __name__ == '__main__':
     # for package in tqdm(packages_to_chunk, desc="Segmenting Files"):
     #     segmented_file_paths+=[generate_segments(package)]
 
-    num_processes = 16
-    torch.set_num_threads(4)
+    num_processes = 64
+    torch.set_num_threads(1)
     ctx = multiprocessing.get_context("spawn")
     pool = ctx.Pool(processes=num_processes)
     segmented_file_paths = (tqdm(pool.imap(generate_segments, packages_to_chunk, chunksize=1), 
                     desc=f"Segmenting Files", total=len(packages_to_chunk),))
-    segmented_file_paths = list(segmented_file_paths)
+    segmented_file_paths = np.concatenate(list(segmented_file_paths))
     file_path_mappings = batdetect2_pipeline.initialize_mappings(segmented_file_paths, cfg)
     end1 = time.time()
     print(f'Time taken to generate segments {end1-start1}')
