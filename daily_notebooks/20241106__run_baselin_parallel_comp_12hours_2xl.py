@@ -12,8 +12,6 @@ import pandas as pd
 import time
 import io
 
-import matplotlib.pyplot as plt
-
 import sys
 import fsspec
 
@@ -30,7 +28,6 @@ from cfg import get_config
 from bat_detect.detector import models
 import bat_detect.detector.compute_features as feats
 import bat_detect.detector.post_process as pp
-import bat_detect.utils.audio_utils as au
 import bat_detect.utils.detector_utils as du
 import bat_detect.utils.wavfile as wavfile
 

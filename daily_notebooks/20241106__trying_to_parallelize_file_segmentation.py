@@ -1,23 +1,12 @@
 from pathlib import Path
 from torch import multiprocessing
-import warnings
 import torch
-import librosa
-import os
 import fsspec
 
 from tqdm import tqdm
 import soundfile as sf
 
 import numpy as np
-import pandas as pd
-import time
-
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from matplotlib import colors
-import datetime as dt
-
 import sys
 
 # append the path of the
@@ -26,16 +15,7 @@ sys.path.append('..')
 sys.path.append(f'{Path(__file__).parent}/../src/')
 sys.path.append(f'{Path(__file__).parent}/../src/models/bat_call_detector/batdetect2/')
 
-import batdt2_pipeline as batdetect2_pipeline
-from pipeline import pipeline
-from utils.utils import gen_empty_df
 from cfg import get_config
-from bat_detect.detector import models
-import bat_detect.detector.compute_features as feats
-import bat_detect.detector.post_process as pp
-import bat_detect.utils.audio_utils as au
-import bat_detect.utils.detector_utils as du
-import bat_detect.utils.wavfile as wavfile
 
 def generate_segments(package_to_chunk):
     """
