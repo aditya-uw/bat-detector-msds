@@ -425,6 +425,8 @@ if __name__ == '__main__':
     segmented_file_paths = []
     for package in tqdm(packages_to_chunk, desc="Segmenting Files"):
         segmented_file_paths+=[generate_segments(package)]
+    segmented_file_paths = np.concatenate(list(segmented_file_paths))
+    print(segmented_file_paths)
     file_path_mappings = batdetect2_pipeline.initialize_mappings(segmented_file_paths, cfg)
     baseline_rm_start = time.time()
     bd2_dets = run_models(file_path_mappings)
@@ -460,7 +462,7 @@ if __name__ == '__main__':
     ctx = multiprocessing.get_context("spawn")
     pool = ctx.Pool(processes=num_processes)
     segmented_file_paths = (tqdm(pool.imap(delete_segment, segmented_file_paths, chunksize=1), 
-                    desc=f"Segmenting Files", total=len(packages_to_chunk),))
+                    desc=f"Deleting Files", total=len(packages_to_chunk),))
     segmented_file_paths = list(segmented_file_paths)
     parallel_rm_end = time.time()
     print(f'Time taken to generate segments {parallel_rm_start-parallel_sg_start}')
