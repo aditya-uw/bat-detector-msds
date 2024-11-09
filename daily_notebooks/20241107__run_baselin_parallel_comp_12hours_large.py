@@ -426,7 +426,6 @@ if __name__ == '__main__':
     for package in tqdm(packages_to_chunk, desc="Segmenting Files"):
         segmented_file_paths+=[generate_segments(package)]
     segmented_file_paths = np.concatenate(list(segmented_file_paths))
-    print(segmented_file_paths)
     file_path_mappings = batdetect2_pipeline.initialize_mappings(segmented_file_paths, cfg)
     baseline_rm_start = time.time()
     bd2_dets = run_models(file_path_mappings)
@@ -436,7 +435,7 @@ if __name__ == '__main__':
     print(f'Baseline run models time: {baseline_rm_end-baseline_rm_start}')
     print(f'Baseline pipeline time: {baseline_rm_end-baseline_sg_start}')
     baseline_estimates = np.array([baseline_rm_start-baseline_sg_start, baseline_rm_end-baseline_rm_start, baseline_rm_end-baseline_sg_start])
-    np.save(f'{Path(__file__).parent}/20241107__large_160gb_baseline_16p1c1t_estimates.npy', baseline_estimates)
+    np.save(f'{Path(__file__).parent}/20241108__xl_160gb_baseline_32p1c1t_estimates.npy', baseline_estimates)
 
     parallel_sg_start = time.time()
     num_processes = multiprocessing.cpu_count()
@@ -448,7 +447,6 @@ if __name__ == '__main__':
     segmented_file_paths = np.concatenate(list(segmented_file_paths))
     file_path_mappings = batdetect2_pipeline.initialize_mappings(segmented_file_paths, cfg)
     parallel_rm_start = time.time()
-    print(f'Time taken to generate segments {parallel_rm_start-parallel_sg_start}')
     num_processes = multiprocessing.cpu_count()
     torch.set_num_threads(1)
     pool = multiprocessing.Pool(processes=num_processes)
@@ -469,4 +467,4 @@ if __name__ == '__main__':
     print(f'Parallel BatDetect2 time: {parallel_rm_end-parallel_rm_start}')
     print(f'Total pipeline time: {parallel_rm_end-parallel_sg_start}')
     parallel_estimates = np.array([parallel_rm_start-parallel_sg_start, parallel_rm_end-parallel_rm_start, parallel_rm_end-parallel_sg_start])
-    np.save(f'{Path(__file__).parent}/20241107__large_160gb_parallel_16p1c1t_estimates.npy', parallel_estimates)
+    np.save(f'{Path(__file__).parent}/20241108__xl_160gb_parallel_32p1c1t_estimates.npy', parallel_estimates)
