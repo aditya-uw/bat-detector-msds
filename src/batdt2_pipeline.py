@@ -11,6 +11,7 @@ import matplotlib.colors as colors
 import datetime as dt
 from pathlib import Path
 from torch import multiprocessing
+import torch
 
 import exiftool
 import suncalc
@@ -61,6 +62,66 @@ LABEL_FOR_GROUPS = {
                     0: 'LF', 
                     1: 'HF'
                     }
+
+def generate_segments_parallel(package_to_chunk):
+    """
+    Segments audio file into clips of duration length and saves them to output/tmp folder.
+    Allows detection model to be run on segments instead of entire file as recommended.
+    These segments will be deleted from the output/tmp folder after detections have been generated.
+
+    Parameters
+    ------------
+    audio_file : `pathlib.Path`
+        - The path to an audio_file from the input directory provided in the command line
+    output_dir : `pathlib.Path`
+        - The path to the tmp folder that saves all of our segments.
+    start_time : `float`
+        - The time at which the segments will start being generated from within the audio file
+    duration : `float`
+        - The duration of all segments generated from the audio file.
+
+    Returns
+    ------------
+    output_files : `List`
+        - The path (a str) to each generated segment of the given audio file will be stored in this list.
+        - The offset of each generated segment of the given audio file will be stored in this list.
+        - Both items are stored in a dict{} for each generated segment.
+    """
+
+    output_files = []
+    ip_audio = sf.SoundFile(package_to_chunk['audio_file'])
+
+    sampling_rate = ip_audio.samplerate
+    # Convert to sampled units
+    ip_start = int(package_to_chunk['start_time'] * sampling_rate)
+    ip_duration = int(package_to_chunk['segment_duration'] * sampling_rate)
+    ip_end = ip_audio.frames
+
+    # for the length of the duration, process the audio into duration length clips
+    for sub_start in range(ip_start, ip_end, ip_duration):
+        sub_end = np.minimum(sub_start + ip_duration, ip_end)
+
+        # For file names, convert back to seconds 
+        op_file = package_to_chunk['audio_file'].name.replace(" ", "_")
+        start_seconds =  sub_start / sampling_rate
+        end_seconds =  sub_end / sampling_rate
+        op_file_en = "__{:.2f}".format(start_seconds) + "_" + "{:.2f}".format(end_seconds)
+        op_file = op_file[:-4] + op_file_en + ".wav"
+        
+        op_path = package_to_chunk['tmp_dir'] / op_file
+        output_files.append({
+            "input_filepath": package_to_chunk['audio_file'],
+            "audio_file": op_path, 
+            "offset":  package_to_chunk['start_time'] + (sub_start/sampling_rate),
+        })
+        
+        if (not(op_path.exists())):
+            sub_length = sub_end - sub_start
+            ip_audio.seek(sub_start)
+            op_audio = ip_audio.read(sub_length)
+            sf.write(op_path, op_audio, sampling_rate, subtype='PCM_16')
+    
+    return output_files 
 
 def generate_segments(audio_file: Path, output_dir: Path, start_time: float, duration: float):
     """
@@ -364,6 +425,7 @@ def apply_models(file_path_mappings, cfg):
         - Events are always "Echolocation" as we are using a model that only detects search-phase calls.
     """
 
+    torch.set_num_threads(1)
     process_pool = multiprocessing.Pool(cfg['num_processes'])
 
     bd_dets = tqdm(
@@ -775,7 +837,7 @@ def run_pipeline_for_individual_files_with_df(cfg):
                 print(f"This file exists under {recover_folder}/UBNA_{audiomoth_folder}")
                 segmented_file_paths = generate_segmented_paths([file], cfg)
                 file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-                if (cfg["num_processes"] <= 6):
+                if (cfg["num_processes"] <= 1):
                     bd_preds = run_models(file_path_mappings)
                 else:
                     bd_preds = apply_models(file_path_mappings, cfg)
@@ -848,10 +910,30 @@ def run_pipeline_for_session_with_df(cfg):
     if not cfg['tmp_dir'].is_dir():
         cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
 
+    packages_to_chunk = []
+    for path in data_params['good_audio_files']:
+        chunk_instructions_and_files = dict()
+        chunk_instructions_and_files['audio_file'] = path
+        chunk_instructions_and_files['tmp_dir'] = cfg['tmp_dir']
+        chunk_instructions_and_files['start_time'] = cfg['start_time']
+        chunk_instructions_and_files['segment_duration'] = cfg['segment_duration']
+        packages_to_chunk+=[chunk_instructions_and_files]
+
     if (cfg['run_model']):
-        segmented_file_paths = generate_segmented_paths(data_params['good_audio_files'], cfg)
+        if (cfg["num_processes"] <= 1):
+            segmented_file_paths = []
+            for package in tqdm(packages_to_chunk, desc="Segmenting Files"):
+                segmented_file_paths+=[generate_segments_parallel(package)]
+            segmented_file_paths = np.concatenate(list(segmented_file_paths))
+        else:
+            torch.set_num_threads(1)
+            ctx = multiprocessing.get_context("spawn")
+            pool = ctx.Pool(processes=cfg["num_processes"])
+            segmented_file_paths = (tqdm(pool.imap(generate_segments_parallel, packages_to_chunk, chunksize=1), 
+                            desc=f"Segmenting Files", total=len(packages_to_chunk),))
+            segmented_file_paths = np.concatenate(list(segmented_file_paths))
         file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
-        if (cfg["num_processes"] <= 6):
+        if (cfg["num_processes"] <= 1):
             bd_preds = run_models(file_path_mappings)
         else:
             bd_preds = apply_models(file_path_mappings, cfg)
@@ -1062,7 +1144,7 @@ def parse_args():
     parser.add_argument(
         "--num_processes",
         type=int,
-        default=4,
+        default=1,
     )
     return vars(parser.parse_args())
 
