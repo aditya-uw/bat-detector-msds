@@ -564,29 +564,26 @@ def assemble_source_points_in_meters(d_mics_to_ref_meters, microphones_used, A_l
 
     return bucket
 
-def plot_three_plane_trajectories(dets, good_bucket, bucket, mic_locs, start, length):
+def plot_three_plane_trajectories(ax1, ax2, ax3, dets, good_bucket, bucket, mic_locs, start, length):
     cmap = plt.get_cmap('viridis')
     map_vals = (dets['SNR'])
     color_vals = np.linspace(start, start+length, bucket.shape[1])
     norm = plt.Normalize(color_vals.min(), color_vals.max())
     line_colors = cmap(norm(color_vals))
-    plt.subplot(131)
-    plt.plot(good_bucket[0,:], good_bucket[1,:], alpha=0.4, color='k')
-    plt.scatter(bucket[0,:], bucket[1,:], color=line_colors, alpha=1, s=50)
-    plt.scatter(x=mic_locs[:,0], y=mic_locs[:,1], facecolor='yellow', edgecolor='k')
-    plt.scatter(x=0, y=0, facecolor='yellow', edgecolor='k')
+    ax1.plot(good_bucket[0,:], good_bucket[1,:], alpha=0.4, color='k')
+    ax1.scatter(bucket[0,:], bucket[1,:], color=line_colors, alpha=1, s=50)
+    ax1.scatter(x=mic_locs[:,0], y=mic_locs[:,1], facecolor='yellow', edgecolor='k')
+    ax1.scatter(x=0, y=0, facecolor='yellow', edgecolor='k')
 
-    plt.subplot(132)
-    plt.plot(good_bucket[1,:], good_bucket[2,:], alpha=0.4, color='k')
-    plt.scatter(bucket[1,:], bucket[2,:], color=line_colors, alpha=1, s=50)
-    plt.scatter(x=mic_locs[:,1], y=mic_locs[:,2], facecolor='yellow', edgecolor='k')
-    plt.scatter(x=0, y=0, facecolor='yellow', edgecolor='k')
+    ax2.plot(good_bucket[1,:], good_bucket[2,:], alpha=0.4, color='k')
+    ax2.scatter(bucket[1,:], bucket[2,:], color=line_colors, alpha=1, s=50)
+    ax2.scatter(x=mic_locs[:,1], y=mic_locs[:,2], facecolor='yellow', edgecolor='k')
+    ax2.scatter(x=0, y=0, facecolor='yellow', edgecolor='k')
 
-    plt.subplot(133)
-    plt.plot(good_bucket[0,:], good_bucket[2,:], alpha=0.4, color='k')
-    plt.scatter(bucket[0,:], bucket[2,:], color=line_colors, alpha=1, s=50)
-    plt.scatter(x=mic_locs[:,0], y=mic_locs[:,2], facecolor='yellow', edgecolor='k')
-    plt.scatter(x=0, y=0, facecolor='yellow', edgecolor='k')
+    ax3.plot(good_bucket[0,:], good_bucket[2,:], alpha=0.4, color='k')
+    ax3.scatter(bucket[0,:], bucket[2,:], color=line_colors, alpha=1, s=50)
+    ax3.scatter(x=mic_locs[:,0], y=mic_locs[:,2], facecolor='yellow', edgecolor='k')
+    ax3.scatter(x=0, y=0, facecolor='yellow', edgecolor='k')
 
 def get_d_mics_with_mic_locs(microphones_used, t_delay_wrt_selected_channel, selected_channel_for_ref):
     ind_of_selected_channel = np.where(microphones_used==(selected_channel_for_ref+1))[0]
