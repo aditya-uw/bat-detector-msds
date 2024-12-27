@@ -77,7 +77,7 @@ def generate_segments_for_osn(package_to_chunk):
             
             op_path = package_to_chunk['tmp_dir'] / op_file
             output_files.append({
-                "input_filepath": package_to_chunk['audio_file'],
+                "input_filepath": package_to_chunk['input_filepath'],
                 "audio_file": op_path, 
                 "offset":  package_to_chunk['start_time'] + (sub_start/sampling_rate),
             })
@@ -212,12 +212,13 @@ if __name__ == '__main__':
             packages_to_chunk = []
             chunk_instructions_and_files = dict()
             chunk_instructions_and_files['audio_file'] = osn_file_path
+            chunk_instructions_and_files['input_filepath'] = file
             chunk_instructions_and_files['tmp_dir'] = cfg['tmp_dir']
             chunk_instructions_and_files['start_time'] = 0.0
             chunk_instructions_and_files['segment_duration'] = 30.0
             packages_to_chunk+=[chunk_instructions_and_files]
 
-            torch.set_num_threads(1)
+            torch.set_num_threads(64)
             ctx = multiprocessing.get_context("spawn")
             pool = ctx.Pool(processes=cfg["num_processes"])
             segmented_file_paths = (tqdm(pool.imap(generate_segments_for_osn, packages_to_chunk, chunksize=1), 
@@ -257,7 +258,7 @@ if __name__ == '__main__':
             bd_preds["File Duration"] = f'{cfg["duration"]}'
             batdt2_pipeline._save_predictions(bd_preds, data_params['output_dir'], cfg)
 
-            torch.set_num_threads(1)
+            torch.set_num_threads(64)
             ctx = multiprocessing.get_context("spawn")
             pool = ctx.Pool(processes=cfg['num_processes'])
             segmented_file_paths = (tqdm(pool.imap(delete_segment, segmented_file_paths, chunksize=1), 
