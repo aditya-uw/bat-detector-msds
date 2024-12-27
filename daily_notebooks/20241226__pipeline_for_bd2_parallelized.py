@@ -53,8 +53,8 @@ def delete_segment(path):
     path['audio_file'].unlink(missing_ok=False)
 
 if __name__ == '__main__':
-    wav_filename = '20220730_053000'
-    site = 'Carp'
+    wav_filename = '20220829_090000'
+    site = 'Foliage'
     plot_file = Path(f'{Path.home()}/Documents/{wav_filename}/input/{wav_filename}.WAV')
 
     save_dir = Path(f'{Path.home()}/Documents/bd2__det_thresh_sweep_{wav_filename}')
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     parallel_sg_end = time.time()
 
     increment = 0.01
-    for thresh in np.arange(0, 1+increment, increment):
+    for thresh in np.arange(0, 0.6+increment, increment):
         args = dict()
         args['detection_threshold'] = thresh
         args['chunk_size'] = 2

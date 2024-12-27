@@ -1,14 +1,17 @@
 import numpy as np
 import pandas as pd
 import datetime as dt
+import soundfile as sf
 
 import dask.dataframe as dd
 from pathlib import Path
+import re
 
 import torch
 from tqdm import tqdm
 from torch import multiprocessing
 
+import fsspec
 import sys
 
 # append the path of the
@@ -23,6 +26,69 @@ from pipeline import pipeline
 from models.bat_call_detector.model_detector import BatCallDetector
 from utils.utils import gen_empty_df
 
+
+def generate_segments_for_osn(package_to_chunk):
+    """
+    Segments audio file into clips of duration length and saves them to output/tmp folder.
+    Allows detection model to be run on segments instead of entire file as recommended.
+    These segments will be deleted from the output/tmp folder after detections have been generated.
+
+    Parameters
+    ------------
+    audio_file : `pathlib.Path`
+        - The path to an audio_file from the input directory provided in the command line
+    output_dir : `pathlib.Path`
+        - The path to the tmp folder that saves all of our segments.
+    start_time : `float`
+        - The time at which the segments will start being generated from within the audio file
+    duration : `float`
+        - The duration of all segments generated from the audio file.
+
+    Returns
+    ------------
+    output_files : `List`
+        - The path (a str) to each generated segment of the given audio file will be stored in this list.
+        - The offset of each generated segment of the given audio file will be stored in this list.
+        - Both items are stored in a dict{} for each generated segment.
+    """
+
+    output_files = []
+    fs = fsspec.filesystem('s3', anon=True, client_kwargs={'endpoint_url': 'https://sdsc.osn.xsede.org'})
+    file = fs.open(path=package_to_chunk['audio_file'])
+    if file.details['size']>0:
+        ip_audio = sf.SoundFile(file)
+
+        sampling_rate = ip_audio.samplerate
+        # Convert to sampled units
+        ip_start = int(package_to_chunk['start_time'] * sampling_rate)
+        ip_duration = int(package_to_chunk['segment_duration'] * sampling_rate)
+        ip_end = ip_audio.frames
+
+        # for the length of the duration, process the audio into duration length clips
+        for sub_start in range(ip_start, ip_end, ip_duration):
+            sub_end = np.minimum(sub_start + ip_duration, ip_end)
+
+            # For file names, convert back to seconds 
+            op_file = package_to_chunk['audio_file'].name.replace(" ", "_")
+            start_seconds =  sub_start / sampling_rate
+            end_seconds =  sub_end / sampling_rate
+            op_file_en = "__{:.2f}".format(start_seconds) + "_" + "{:.2f}".format(end_seconds)
+            op_file = op_file[:-4] + op_file_en + ".wav"
+            
+            op_path = package_to_chunk['tmp_dir'] / op_file
+            output_files.append({
+                "input_filepath": package_to_chunk['audio_file'],
+                "audio_file": op_path, 
+                "offset":  package_to_chunk['start_time'] + (sub_start/sampling_rate),
+            })
+            
+            if (not(op_path.exists())):
+                sub_length = sub_end - sub_start
+                ip_audio.seek(sub_start)
+                op_audio = ip_audio.read(sub_length)
+                sf.write(op_path, op_audio, sampling_rate, subtype='PCM_16')
+        
+    return output_files 
 
 def apply_model(file_mapping):
     """
@@ -134,9 +200,13 @@ if __name__ == '__main__':
                 audiomoth_folder = good_location_df.loc[good_location_df['file_path'] == str(file), "sd_card_num"].values[0]
                 print(f"This file exists under {recover_folder}/UBNA_{audiomoth_folder}")
 
+                file_path = '/'.join(file.parts[2:])
+                cleaned_path = re.sub(r"(ubna_data_\d+)_mir", r"\1", file_path)
+                osn_file_path = Path(f'bio230143-bucket01/{cleaned_path}')
+                
                 packages_to_chunk = []
                 chunk_instructions_and_files = dict()
-                chunk_instructions_and_files['audio_file'] = file
+                chunk_instructions_and_files['audio_file'] = osn_file_path
                 chunk_instructions_and_files['tmp_dir'] = cfg['tmp_dir']
                 chunk_instructions_and_files['start_time'] = 0.0
                 chunk_instructions_and_files['segment_duration'] = 30.0
@@ -145,7 +215,7 @@ if __name__ == '__main__':
                 torch.set_num_threads(1)
                 ctx = multiprocessing.get_context("spawn")
                 pool = ctx.Pool(processes=cfg["num_processes"])
-                segmented_file_paths = (tqdm(pool.imap(batdt2_pipeline.generate_segments_parallel, packages_to_chunk, chunksize=1), 
+                segmented_file_paths = (tqdm(pool.imap(generate_segments_for_osn, packages_to_chunk, chunksize=1), 
                                 desc=f"Segmenting Files", total=len(packages_to_chunk),))
                 segmented_file_paths = np.concatenate(list(segmented_file_paths))
 
@@ -181,4 +251,10 @@ if __name__ == '__main__':
                 bd_preds["SD Card"] = audiomoth_folder
                 bd_preds["File Duration"] = f'{cfg["duration"]}'
                 batdt2_pipeline._save_predictions(bd_preds, data_params['output_dir'], cfg)
-                batdt2_pipeline.delete_segments(segmented_file_paths)
+
+                torch.set_num_threads(1)
+                ctx = multiprocessing.get_context("spawn")
+                pool = ctx.Pool(processes=cfg['num_processes'])
+                segmented_file_paths = (tqdm(pool.imap(delete_segment, segmented_file_paths, chunksize=1), 
+                                desc=f"Deleting Files", total=len(packages_to_chunk),))
+                segmented_file_paths = list(segmented_file_paths)
