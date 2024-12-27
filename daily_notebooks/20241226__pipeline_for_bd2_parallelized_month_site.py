@@ -1,10 +1,8 @@
 import numpy as np
 import pandas as pd
+import datetime as dt
 
-import librosa
-import warnings
-
-import time
+import dask.dataframe as dd
 from pathlib import Path
 
 import torch
@@ -20,6 +18,7 @@ sys.path.append(f'{Path(__file__).parent}/../src/')
 sys.path.append(f'{Path(__file__).parent}/../src/models/bat_call_detector/batdetect2/')
 
 import batdt2_pipeline
+from cfg import get_config
 from pipeline import pipeline
 from models.bat_call_detector.model_detector import BatCallDetector
 from utils.utils import gen_empty_df
@@ -55,88 +54,131 @@ def apply_model(file_mapping):
 def delete_segment(path):
     path['audio_file'].unlink(missing_ok=False)
 
+
+def get_params_relevant_to_data_at_location(cfg):
+    data_params = dict()
+    data_params['site'] = cfg['site']
+    print(f"Searching for files from {cfg['site']} in {cfg['month']} {cfg['year']}")
+
+    hard_drive_df = dd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_*_collected_audio_records.csv', dtype=str).compute()
+    if 'Unnamed: 0' in hard_drive_df.columns:
+        hard_drive_df.drop(columns='Unnamed: 0', inplace=True)
+    hard_drive_df["datetime_UTC"] = pd.DatetimeIndex(hard_drive_df["datetime_UTC"])
+    hard_drive_df.set_index("datetime_UTC", inplace=True)
+    
+    files_from_location = filter_df_with_location(hard_drive_df, cfg)
+    data_params['output_dir'] = cfg["output_dir"] / (data_params["site"].split()[0])
+    print(f"Will save csv file to {data_params['output_dir']}")
+
+    data_params['ref_audio_files'] = sorted(list(files_from_location["file_path"].apply(lambda x : Path(x)).values))
+    file_status_cond = files_from_location["file_status"] == "Usable for detection"
+    file_duration_cond = np.isclose(files_from_location["file_duration"].astype('float'), cfg['duration'])
+    good_location_df = files_from_location.loc[file_status_cond&file_duration_cond]
+    data_params['good_audio_files'] = sorted(list(good_location_df["file_path"].apply(lambda x : Path(x)).values))
+
+    if data_params['good_audio_files'] == data_params['ref_audio_files']:
+        print("All files from deployment session good!")
+    else:
+        print("Error files exist!")
+
+    print(f"Will be looking at {len(data_params['good_audio_files'])} files from {data_params['site']}")
+
+    return good_location_df, data_params
+
+
+def filter_df_with_location(ubna_data_df, cfg):
+    site_name_cond = ubna_data_df["site_name"] == cfg['site']
+    file_year_cond = ubna_data_df.index.year == (dt.datetime.strptime(cfg['year'], '%Y')).year
+    file_month_cond = ubna_data_df.index.month == (dt.datetime.strptime(cfg['month'], '%B')).month
+    minute_cond = np.logical_or((ubna_data_df.index).minute == 30, (ubna_data_df.index).minute == 0)
+    datetime_cond = np.logical_and((ubna_data_df.index).second == 0, minute_cond)
+    file_error_cond = np.logical_and((ubna_data_df["file_duration"]!='File has no comment due to error!'), (ubna_data_df["file_duration"]!='File has no Audiomoth-related comment'))
+    all_errors_cond = np.logical_and((ubna_data_df["file_duration"]!='Is empty!'), file_error_cond)
+    file_date_cond = np.logical_and(file_year_cond, file_month_cond)
+
+    filtered_location_df = ubna_data_df.loc[site_name_cond&datetime_cond&file_date_cond&all_errors_cond].sort_index()
+    filtered_location_nightly_df = filtered_location_df.between_time(cfg['recording_start'], cfg['recording_end'], inclusive="left")
+
+    return filtered_location_nightly_df
+
 if __name__ == '__main__':
-    wav_filename = '20220730_053000'
-    site = 'Carp'
-    plot_file = Path(f'{Path.home()}/Documents/{wav_filename}/input/{wav_filename}.WAV')
+    for month in ['July', 'August', 'September', 'October']:
+        cfg = get_config()
+        cfg["site"] = 'Carp Pond'
+        cfg["year"] = '2022'
+        cfg["month"] = month
+        cfg['recording_start'] = '00:00'
+        cfg['recording_end'] = '16:00'
+        cfg['duration'] = 1795
+        cfg["output_dir"] = Path(f'{Path.home()}/Documents/bd2_dets_20241226_thresh0p20/output_dir')
+        cfg["tmp_dir"] = Path(f'{Path.home()}/Documents/bd2_dets_20241226_thresh0p20/output')
+        cfg["skip_existing"] = False
+        cfg['should_csv'] = True
+        cfg["num_processes"] = multiprocessing.cpu_count()
 
-    save_dir = Path(f'{Path.home()}/Documents/bd2__det_thresh_sweep_{wav_filename}')
-    save_file_name = f"bd2__{plot_file.name.split('.')[0]}"
-    save_dir.mkdir(parents=True, exist_ok=True)
+        good_location_df, data_params = get_params_relevant_to_data_at_location(cfg)
+        bd_preds = pd.DataFrame()
 
-    packages_to_chunk = []
-    chunk_instructions_and_files = dict()
-    chunk_instructions_and_files['audio_file'] = plot_file
-    chunk_instructions_and_files['tmp_dir'] = save_dir
-    chunk_instructions_and_files['start_time'] = 0.0
-    chunk_instructions_and_files['segment_duration'] = 30.0
-    packages_to_chunk+=[chunk_instructions_and_files]
+        if not data_params['output_dir'].is_dir():
+            data_params['output_dir'].mkdir(parents=True, exist_ok=True)
+        if not cfg['tmp_dir'].is_dir():
+            cfg['tmp_dir'].mkdir(parents=True, exist_ok=True)
 
-    cfg=dict()
-    cfg['num_processes'] = multiprocessing.cpu_count()
-    parallel_sg_start = time.time()
-    torch.set_num_threads(1)
-    ctx = multiprocessing.get_context("spawn")
-    pool = ctx.Pool(processes=cfg['num_processes'])
-    segmented_file_paths = (tqdm(pool.imap(batdt2_pipeline.generate_segments_parallel, packages_to_chunk, chunksize=1), 
-                    desc=f"Segmenting Files", total=len(packages_to_chunk),))
-    segmented_file_paths = np.concatenate(list(segmented_file_paths))
-    parallel_sg_end = time.time()
+        for file in data_params['good_audio_files']:
+            cfg["csv_filename"] = f"bd2__{data_params['site'].split()[0]}_{file.name.split('.')[0]}"
+            if cfg['skip_existing'] & (data_params['output_dir'] / f"{cfg['csv_filename']}.csv").is_file():
+                print(f'Detections for this {file.name} have already been generated!')
+            else:
+                print(f"Generating detections for {file.name}")
+                recover_folder = good_location_df.loc[good_location_df['file_path'] == str(file), 'recover_folder'].values[0]
+                audiomoth_folder = good_location_df.loc[good_location_df['file_path'] == str(file), "sd_card_num"].values[0]
+                print(f"This file exists under {recover_folder}/UBNA_{audiomoth_folder}")
 
-    increment = 0.01
-    for thresh in np.arange(0, 1+increment, increment):
-        args = dict()
-        args['detection_threshold'] = thresh
-        args['chunk_size'] = 2
+                packages_to_chunk = []
+                chunk_instructions_and_files = dict()
+                chunk_instructions_and_files['audio_file'] = file
+                chunk_instructions_and_files['tmp_dir'] = cfg['tmp_dir']
+                chunk_instructions_and_files['start_time'] = 0.0
+                chunk_instructions_and_files['segment_duration'] = 30.0
+                packages_to_chunk+=[chunk_instructions_and_files]
 
-        cfg["time_expansion_factor"] = 1.0
-        # Offset (seconds) from the beginning of the audio file to start processing
-        cfg["start_time"] = 0.0
-        # Input audio is divided into segments of this duration (seconds), each processed individually
-        cfg["segment_duration"] = 30.0
-        cfg["models"] = [BatCallDetector(detection_threshold=args['detection_threshold'],
-                                        spec_slices=False,
-                                        chunk_size=args['chunk_size'], 
-                                        model_path=f"{Path(__file__).parent}/../src/models/bat_call_detector/batdetect2/models/Net2DFast_UK_same.pth.tar",
-                                        time_expansion_factor=1.0,
-                                        quiet=False,
-                                        cnn_features=True,
-                                        peak_distance=0.05,
-                                        peak_threshold=0.25,
-                                        template_dict_path=f"{Path(__file__).parent}/../src/models/bat_call_detector/templates/template_dict.pickle",
-                                        num_matches_threshold=2,
-                                        buzz_feed_range=0.15,
-                                        alpha=1)]
+                torch.set_num_threads(1)
+                ctx = multiprocessing.get_context("spawn")
+                pool = ctx.Pool(processes=cfg["num_processes"])
+                segmented_file_paths = (tqdm(pool.imap(batdt2_pipeline.generate_segments_parallel, packages_to_chunk, chunksize=1), 
+                                desc=f"Segmenting Files", total=len(packages_to_chunk),))
+                segmented_file_paths = np.concatenate(list(segmented_file_paths))
 
-        file_path_mappings = batdt2_pipeline.initialize_mappings(segmented_file_paths, cfg)
-        parallel_rm_start = time.time()
-        torch.set_num_threads(1)
-        pool = multiprocessing.Pool(processes=cfg['num_processes'])
-        print(f'Parsing {len(file_path_mappings)} chunks with {cfg["num_processes"]} processors and chunksize 1 and {torch.get_num_threads()} threads per processor')
-        bd_dets = tqdm(pool.imap(apply_model, file_path_mappings, chunksize=1), 
-                    desc=f"Applying BatDetect2", total=len(file_path_mappings))
-        bd_preds = gen_empty_df() 
-        bd_preds = pd.concat(bd_dets, ignore_index=True)
-        parallel_rm_end = time.time()
-
-        print(f'Time taken to generate segments {parallel_sg_end-parallel_sg_start}')
-        print(f'Parallel BatDetect2 time: {parallel_rm_end-parallel_rm_start}')
-        print(f'Total pipeline time: {parallel_rm_end-parallel_sg_start}')
-
-        ones = int(args['detection_threshold'])
-        decimals = int(round(100*(args['detection_threshold']), 1) % 100)
-        threshold_tag = f"threshold{ones}p{decimals:02}"
-        save_loc = Path(f"bd2__{threshold_tag}_chunksize{int(args['chunk_size'])}_{plot_file.name.split('.')[0]}.csv")
-        print("saving to", (save_dir/save_loc))
-        bd_preds.to_csv((save_dir/save_loc))
-
-    parallel_del_start = time.time()
-    torch.set_num_threads(1)
-    ctx = multiprocessing.get_context("spawn")
-    pool = ctx.Pool(processes=cfg['num_processes'])
-    segmented_file_paths = (tqdm(pool.imap(delete_segment, segmented_file_paths, chunksize=1), 
-                    desc=f"Deleting Files", total=len(packages_to_chunk),))
-    segmented_file_paths = list(segmented_file_paths)
-    parallel_del_end = time.time()
-
-
+                cfg["time_expansion_factor"] = 1.0
+                # Offset (seconds) from the beginning of the audio file to start processing
+                cfg["start_time"] = 0.0
+                # Input audio is divided into segments of this duration (seconds), each processed individually
+                cfg["segment_duration"] = 30.0
+                cfg["models"] = [BatCallDetector(detection_threshold=0.2,
+                                                spec_slices=False,
+                                                chunk_size=2, 
+                                                model_path=f"{Path(__file__).parent}/../src/models/bat_call_detector/batdetect2/models/Net2DFast_UK_same.pth.tar",
+                                                time_expansion_factor=1.0,
+                                                quiet=False,
+                                                cnn_features=True,
+                                                peak_distance=0.05,
+                                                peak_threshold=0.25,
+                                                template_dict_path=f"{Path(__file__).parent}/../src/models/bat_call_detector/templates/template_dict.pickle",
+                                                num_matches_threshold=2,
+                                                buzz_feed_range=0.15,
+                                                alpha=1)]
+                file_path_mappings = batdt2_pipeline.initialize_mappings(segmented_file_paths, cfg)
+                        
+                torch.set_num_threads(1)
+                pool = multiprocessing.Pool(processes=cfg['num_processes'])
+                print(f'Parsing {len(file_path_mappings)} chunks with {cfg["num_processes"]} processors and chunksize 1 and {torch.get_num_threads()} threads per processor')
+                bd_dets = tqdm(pool.imap(apply_model, file_path_mappings, chunksize=1), 
+                            desc=f"Applying BatDetect2", total=len(file_path_mappings))
+                bd_preds = gen_empty_df() 
+                bd_preds = pd.concat(bd_dets, ignore_index=True)
+                bd_preds["Site name"] = data_params['site']
+                bd_preds["Recover Folder"] = recover_folder
+                bd_preds["SD Card"] = audiomoth_folder
+                bd_preds["File Duration"] = f'{cfg["duration"]}'
+                batdt2_pipeline._save_predictions(bd_preds, data_params['output_dir'], cfg)
+                batdt2_pipeline.delete_segments(segmented_file_paths)
