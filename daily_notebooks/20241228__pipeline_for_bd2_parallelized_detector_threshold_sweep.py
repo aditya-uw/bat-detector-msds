@@ -130,8 +130,7 @@ if __name__ == '__main__':
     site = 'Central'
     plot_file = Path(f'{Path.home()}/Documents/{wav_filename}/input/{wav_filename}.WAV')
 
-    save_dir = Path(f'{Path.home()}/Documents/20241228_detection_threshold_sweep/bd2__det_thresh_sweep_{wav_filename}')
-    save_file_name = f"bd2__{plot_file.name.split('.')[0]}"
+    save_dir = Path(f'{Path(__file__).parent}/20241229_detection_threshold_sweep/bd2__det_thresh_sweep_{wav_filename}')
     save_dir.mkdir(parents=True, exist_ok=True)
 
     packages_to_chunk = []
@@ -190,8 +189,9 @@ if __name__ == '__main__':
         ones = int(args['detection_threshold'])
         decimals = int(round(100*(args['detection_threshold']), 1) % 100)
         threshold_tag = f"threshold{ones}p{decimals:02}"
-        save_loc = Path(f"bd2__{threshold_tag}_chunksize{int(args['chunk_size'])}_{plot_file.name.split('.')[0]}.csv")
+        save_loc = Path(f"sweep_files/bd2__{threshold_tag}_chunksize{int(args['chunk_size'])}_{plot_file.name.split('.')[0]}.csv")
         print("saving to", (save_dir/save_loc))
+        (save_dir/save_loc).mkdir(parents=True, exist_ok=True)
         bd_preds.to_csv((save_dir/save_loc))
 
     parallel_del_start = time.time()
