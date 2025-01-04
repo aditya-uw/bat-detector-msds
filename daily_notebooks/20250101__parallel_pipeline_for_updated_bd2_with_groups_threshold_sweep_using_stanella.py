@@ -229,7 +229,7 @@ if __name__ == '__main__':
         parallel_sg_end = time.time()
 
         args = dict()
-        args['detection_threshold'] = 0.01
+        args['detection_threshold'] = 0.00
         args['chunk_size'] = 2
 
         cfg["time_expansion_factor"] = 1.0
