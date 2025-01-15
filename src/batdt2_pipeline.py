@@ -256,7 +256,7 @@ def get_section_of_call_in_file(detection, audio_file):
 def get_snr_from_band_limited_signal(snr_call_signal, snr_noise_signal): 
     signal_power_rms = np.sqrt(np.square(snr_call_signal).mean())
     noise_power_rms = np.sqrt(np.square(snr_noise_signal).mean())
-    snr = abs(20 * np.log10(signal_power_rms / noise_power_rms))
+    snr = (20 * np.log10(signal_power_rms / noise_power_rms))
     return snr
 
 
