@@ -88,7 +88,9 @@ def gather_features_of_interest(dets, kmean_welch, audio_file):
     features_of_interest['classes'] = []
     nyquist = fs//2
     for index, row in dets.iterrows():
+        call_dur = (row['end_time'] - row['start_time'])
         audio_seg, length_of_section, pad = get_section_of_call_in_file(row, audio_file)
+        seg_start = row['start_time'] - call_dur - (3*pad)
         
         freq_pad = 2000
         low_freq_cutoff = row['low_freq']-freq_pad
@@ -107,8 +109,8 @@ def gather_features_of_interest(dets, kmean_welch, audio_file):
         max_value_across_bins = Sxx[max_ind]
         peak_freq = f[max_ind[0]]
         peak_freq_time = t[max_ind[1]]
-        features_of_interest['peak_freqs_spec'].append(peak_freq)
-        features_of_interest['peak_freq_times_spec'].append(peak_freq_time)
+        features_of_interest['peak_freqs_spec'].append(peak_freq[0])
+        features_of_interest['peak_freq_times_spec'].append(seg_start+peak_freq_time[0])
 
         signal = band_limited_audio_seg.copy()
         signal[:int(fs*(length_of_section))] = 0
@@ -147,8 +149,6 @@ def open_and_get_call_info(audio_file, dets):
 
     features_of_interest = gather_features_of_interest(dets, kmean_welch, audio_file)
 
-    dets.reset_index(drop=True, inplace=True)
-
     dets['sampling_rate'] = len(dets) * [audio_file.samplerate]
     dets.insert(0, 'SNR', features_of_interest['snrs'])
     dets.insert(0, 'peak_frequency_WELCH', features_of_interest['peak_freqs_welch'])
@@ -163,6 +163,13 @@ def classify_calls_from_file(bd2_predictions, data_params):
     audio_file = sf.SoundFile(file_path)
     call_signals, dets = open_and_get_call_info(audio_file, bd2_predictions)
     return dets
+
+def _correct_annotation_offsets(annotations_df, input_file, actual_start_time):
+    annotations_df['start_time'] = annotations_df['start_time'] + actual_start_time
+    annotations_df['end_time'] = annotations_df['end_time'] + actual_start_time
+    annotations_df['peak_frequency_time_SPECTROGRAM'] = annotations_df['peak_frequency_time_SPECTROGRAM'] + actual_start_time
+    annotations_df['input_file'] = input_file
+    return annotations_df
 
 def apply_model(file_mapping):
     """
@@ -184,11 +191,9 @@ def apply_model(file_mapping):
 
     bd_dets = file_mapping['model']._run_batdetect(file_mapping['audio_seg']['audio_file'])
     bd_preds_classed = classify_calls_from_file(bd_dets, file_mapping['audio_seg'])
-    corrected_bd_dets = pipeline._correct_annotation_offsets(
-                                                            bd_preds_classed,
-                                                            file_mapping['original_file_name'],
-                                                            file_mapping['audio_seg']['offset']
-                                                            )
+    corrected_bd_dets = _correct_annotation_offsets(bd_preds_classed,
+                                                    file_mapping['original_file_name'],
+                                                    file_mapping['audio_seg']['offset'])
 
     return corrected_bd_dets
 
@@ -238,73 +243,74 @@ if __name__ == '__main__':
     file_keys = list(file_sites.keys())
     save_dir = Path(f'{Path(__file__).parent}/20250114__group_threshold_sweep_results')
     save_dir.mkdir(parents=True, exist_ok=True)
-    for wav_filename in file_keys:
-        site = file_sites[wav_filename]
-        file_path = Path(f'{Path.home()}/Documents/mila-human-wav-txt/{wav_filename}.WAV')
+    # for wav_filename in file_keys:
+    wav_filename = '20220826_070000'
+    site = file_sites[wav_filename]
+    file_path = Path(f'{Path.home()}/Documents/mila-human-wav-txt/{wav_filename}.WAV')
 
-        packages_to_chunk = []
-        chunk_instructions_and_files = dict()
-        chunk_instructions_and_files['audio_file'] = file_path
-        chunk_instructions_and_files['tmp_dir'] = save_dir
-        chunk_instructions_and_files['start_time'] = 0.0
-        chunk_instructions_and_files['segment_duration'] = 30.0
-        packages_to_chunk+=[chunk_instructions_and_files]
+    packages_to_chunk = []
+    chunk_instructions_and_files = dict()
+    chunk_instructions_and_files['audio_file'] = file_path
+    chunk_instructions_and_files['tmp_dir'] = save_dir
+    chunk_instructions_and_files['start_time'] = 0.0
+    chunk_instructions_and_files['segment_duration'] = 30.0
+    packages_to_chunk+=[chunk_instructions_and_files]
 
-        cfg=dict()
-        cfg['num_processes'] = multiprocessing.cpu_count()
-        parallel_sg_start = time.time()
-        torch.set_num_threads(1)
-        ctx = multiprocessing.get_context("spawn")
-        pool = ctx.Pool(processes=cfg['num_processes'])
-        segmented_file_paths = (tqdm(pool.imap(batdt2_pipeline.generate_segments_parallel, packages_to_chunk, chunksize=1), 
-                        desc=f"Segmenting Files", total=len(packages_to_chunk),))
-        segmented_file_paths = np.concatenate(list(segmented_file_paths))
-        parallel_sg_end = time.time()
+    cfg=dict()
+    cfg['num_processes'] = multiprocessing.cpu_count()
+    parallel_sg_start = time.time()
+    torch.set_num_threads(1)
+    ctx = multiprocessing.get_context("spawn")
+    pool = ctx.Pool(processes=cfg['num_processes'])
+    segmented_file_paths = (tqdm(pool.imap(batdt2_pipeline.generate_segments_parallel, packages_to_chunk, chunksize=1), 
+                    desc=f"Segmenting Files", total=len(packages_to_chunk),))
+    segmented_file_paths = np.concatenate(list(segmented_file_paths))
+    parallel_sg_end = time.time()
 
-        args = dict()
-        args['detection_threshold'] = 0.00
-        args['chunk_size'] = 2
+    args = dict()
+    args['detection_threshold'] = 0.00
+    args['chunk_size'] = 2
 
-        cfg["time_expansion_factor"] = 1.0
-        # Offset (seconds) from the beginning of the audio file to start processing
-        cfg["start_time"] = 0.0
-        # Input audio is divided into segments of this duration (seconds), each processed individually
-        cfg["segment_duration"] = 30.0
-        cfg["models"] = [BatCallDetector(detection_threshold=args['detection_threshold'],
-                                        spec_slices=False,
-                                        chunk_size=args['chunk_size'],
-                                        time_expansion_factor=1.0,
-                                        quiet=False,
-                                        cnn_features=True)]
-        
-        file_path_mappings = batdt2_pipeline.initialize_mappings(segmented_file_paths, cfg)
-        parallel_rm_start = time.time()
-        bd_preds = apply_models(file_path_mappings, cfg)
-        parallel_rm_end = time.time()
+    cfg["time_expansion_factor"] = 1.0
+    # Offset (seconds) from the beginning of the audio file to start processing
+    cfg["start_time"] = 0.0
+    # Input audio is divided into segments of this duration (seconds), each processed individually
+    cfg["segment_duration"] = 30.0
+    cfg["models"] = [BatCallDetector(detection_threshold=args['detection_threshold'],
+                                    spec_slices=False,
+                                    chunk_size=args['chunk_size'],
+                                    time_expansion_factor=1.0,
+                                    quiet=False,
+                                    cnn_features=True)]
+    
+    file_path_mappings = batdt2_pipeline.initialize_mappings(segmented_file_paths, cfg)
+    parallel_rm_start = time.time()
+    bd_preds = apply_models(file_path_mappings, cfg)
+    parallel_rm_end = time.time()
 
-        print(f'Time taken to generate segments {parallel_sg_end-parallel_sg_start}')
-        print(f'Parallel BatDetect2 time: {parallel_rm_end-parallel_rm_start}')
-        print(f'Total pipeline time: {parallel_rm_end-parallel_sg_start}')
+    print(f'Time taken to generate segments {parallel_sg_end-parallel_sg_start}')
+    print(f'Parallel BatDetect2 time: {parallel_rm_end-parallel_rm_start}')
+    print(f'Total pipeline time: {parallel_rm_end-parallel_sg_start}')
 
-        ones = int(args['detection_threshold'])
-        decimals = int(round(100*(args['detection_threshold']), 1) % 100)
-        threshold_tag = f"threshold{ones}p{decimals:02}"
-        save_loc_tag = f"{threshold_tag}_chunksize{int(args['chunk_size'])}_{wav_filename}"
-        bd2_save_loc = Path(f"bd2__{save_loc_tag}.csv")
-        rpro_save_loc = Path(f"rpro__{save_loc_tag}.txt")
-        print("saving to", (save_dir / bd2_save_loc))
-        bd_preds.to_csv(save_dir / bd2_save_loc)
+    ones = int(args['detection_threshold'])
+    decimals = int(round(100*(args['detection_threshold']), 1) % 100)
+    threshold_tag = f"threshold{ones}p{decimals:02}"
+    save_loc_tag = f"{threshold_tag}_chunksize{int(args['chunk_size'])}_{wav_filename}"
+    bd2_save_loc = Path(f"bd2__{save_loc_tag}.csv")
+    rpro_save_loc = Path(f"rpro__{save_loc_tag}.txt")
+    print("saving to", (save_dir / bd2_save_loc))
+    bd_preds.to_csv(save_dir / bd2_save_loc)
 
-        ravenpro_df = convert_bd2df_ravenpro(bd_preds)
-        ravenpro_df.to_csv(save_dir / rpro_save_loc, sep="\t")
+    ravenpro_df = convert_bd2df_ravenpro(bd_preds)
+    ravenpro_df.to_csv(save_dir / rpro_save_loc, sep="\t")
 
-        parallel_del_start = time.time()
-        torch.set_num_threads(1)
-        ctx = multiprocessing.get_context("spawn")
-        pool = ctx.Pool(processes=cfg['num_processes'])
-        segmented_file_paths = (tqdm(pool.imap(delete_segment, segmented_file_paths, chunksize=1), 
-                        desc=f"Deleting Files", total=len(packages_to_chunk),))
-        segmented_file_paths = list(segmented_file_paths)
-        parallel_del_end = time.time()
+    parallel_del_start = time.time()
+    torch.set_num_threads(1)
+    ctx = multiprocessing.get_context("spawn")
+    pool = ctx.Pool(processes=cfg['num_processes'])
+    segmented_file_paths = (tqdm(pool.imap(delete_segment, segmented_file_paths, chunksize=1), 
+                    desc=f"Deleting Files", total=len(packages_to_chunk),))
+    segmented_file_paths = list(segmented_file_paths)
+    parallel_del_end = time.time()
 
 
