@@ -25,7 +25,6 @@ sys.path.append('../src/models/bat_call_detector/batdetect2/')
 
 import src.batdt2_pipeline as batdetect2_pipeline
 from pipeline import pipeline
-from cfg import get_config
 
 import bout_clustering as clstr
 
@@ -415,7 +414,7 @@ def get_dets_observed_from_all_channels(microphones_used, file_dir, file_offset)
     dir_name = f'{HOUR_TAG}_{FILE_TIME_TAG}'
     write_dir = file_dir / dir_name
 
-    cfg = get_config()
+    cfg = dict()
     cfg['tmp_dir'] = Path('../output/tmp')
     cfg['run_model'] = True
     cfg['should_csv'] = True
