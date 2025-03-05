@@ -18,7 +18,7 @@ import suncalc
 from sklearn.cluster import KMeans
 import scipy
 
-from cfg import get_config
+from models.bat_call_detector.model_detector import BatCallDetector
 from pipeline import pipeline
 from utils.utils import gen_empty_df, convert_df_ravenpro
 
@@ -553,7 +553,8 @@ def construct_activity_arr(cfg, data_params):
     else:
         nodets = (cfg['duration'])/((data_params['resample_in_min']*60))
 
-    dets = pd.read_csv(f'{data_params["output_dir"]}/{cfg["csv_filename"]}.csv')
+    rawdets = pd.read_csv(f'{data_params["output_dir"]}/{cfg["csv_filename"]}.csv')
+    dets = rawdets[(rawdets['det_prob']>=data_params['detection_threshold_for_activity'])&(rawdets['SNR']>=data_params['SNR_threshold_for_activity'])].copy()
     dets['ref_time'] = pd.to_datetime(dets['input_file'], format="%Y%m%d_%H%M%S", exact=False)
     activity_dets_arr = pd.DataFrame()
     for group in ['', 'LF', 'HF']:
@@ -565,7 +566,7 @@ def construct_activity_arr(cfg, data_params):
         activity = dets_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=0)
 
         if (cfg['cycle_length'] - cfg['duration']) > 5:
-            activity = activity *(cfg['cycle_length'] / cfg['duration'])
+            activity = activity * (cfg['cycle_length'] / cfg['duration'])
         activity_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, activity)), columns=["date_and_time_UTC", f"{group}num_of_detections"])
         activity_arr = activity_arr.set_index("date_and_time_UTC")
         activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
@@ -940,7 +941,9 @@ def run_pipeline_for_session_with_df(cfg):
 
     if (cfg['generate_fig']):
         data_params['resample_in_min'] = 30
-        data_params['resample_tag'] = f"{data_params['resample_in_min']}T"
+        data_params['resample_tag'] = f"{data_params['resample_in_min']}min"
+        data_params['detection_threshold_for_activity'] = 0.35
+        data_params['SNR_threshold_for_activity'] = 3
         construct_activity_arr(cfg, data_params)
         for group in ['', 'LF', 'HF']:
             activity_df = shape_activity_array_into_grid(cfg, data_params, group)
@@ -959,7 +962,7 @@ def get_params_relevant_to_data(cfg):
     data_params["audiomoth_folder"] = f"UBNA_{cfg['sd_unit']}"
     print(f"Searching for files from {cfg['recover_folder']} and {data_params['audiomoth_folder']}")
 
-    cur_data_records = dd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_04_collected_audio_records.csv', dtype=str).compute()
+    cur_data_records = dd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_05_collected_audio_records.csv', dtype=str).compute()
     if 'Unnamed: 0' in cur_data_records.columns:
         cur_data_records.drop(columns='Unnamed: 0', inplace=True)
     cur_data_records["datetime_UTC"] = pd.DatetimeIndex(cur_data_records["datetime_UTC"])
@@ -1147,7 +1150,23 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     
-    cfg = get_config()
+    detector_args = dict()
+    detector_args['detection_threshold'] = 0.20
+    detector_args['chunk_size'] = 2
+
+    cfg = dict()
+    cfg["time_expansion_factor"] = 1.0
+    # Offset (seconds) from the beginning of the audio file to start processing
+    cfg["start_time"] = 0.0
+    # Input audio is divided into segments of this duration (seconds), each processed individually
+    cfg["segment_duration"] = 30.0
+    cfg["models"] = [BatCallDetector(detection_threshold=detector_args['detection_threshold'],
+                                    spec_slices=False,
+                                    chunk_size=detector_args['chunk_size'],
+                                    time_expansion_factor=1.0,
+                                    quiet=False,
+                                    cnn_features=True)]
+    
     cfg["input_audio"] = args['input_audio']
     cfg["recover_folder"] = args["recover_folder"]
     cfg["sd_unit"] = args["sd_unit"]

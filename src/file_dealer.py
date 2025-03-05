@@ -7,8 +7,6 @@ import datetime as dt
 import numpy as np
 import exiftool
 
-import batdt2_pipeline as batdetect2_pipeline
-
 def get_recover_folder_from_filepath(filepath):
     if "recover" in str(filepath.parents[1]):
         return filepath.parents[1].name
@@ -98,6 +96,7 @@ def generate_files_df(cfg):
         artists = []
         durations = []
         for path in good_paths:
+            print(f'Looking at {path}')
             try:
                 raw_data = et.get_metadata(path)
                 datapoint = raw_data[0]
@@ -193,6 +192,7 @@ def get_related_field_records(recover_date):
     """
 
     datetime_of_recovery = dt.datetime.strptime(recover_date, "%Y%m%d")
+    print(datetime_of_recovery)
     if str(datetime_of_recovery.year) == "2021":
         df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2021.csv"))
     if str(datetime_of_recovery.year) == "2022":
@@ -210,6 +210,11 @@ def get_related_field_records(recover_date):
             df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
         else:
             df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2024.csv"))
+    if str(datetime_of_recovery.year) == "2025":
+        if (datetime_of_recovery.month) <= 3:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2024.csv"))
+        else:
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2025.csv"))
 
     return df_fr
 
