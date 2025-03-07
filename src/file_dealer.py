@@ -192,7 +192,7 @@ def get_related_field_records(recover_date):
     """
 
     datetime_of_recovery = dt.datetime.strptime(recover_date, "%Y%m%d")
-    print(datetime_of_recovery)
+    
     if str(datetime_of_recovery.year) == "2021":
         df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2021.csv"))
     if str(datetime_of_recovery.year) == "2022":
@@ -211,7 +211,7 @@ def get_related_field_records(recover_date):
         else:
             df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2024.csv"))
     if str(datetime_of_recovery.year) == "2025":
-        if (datetime_of_recovery.month) <= 3:
+        if (datetime_of_recovery.month) < 3:
             df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2024.csv"))
         else:
             df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2025.csv"))

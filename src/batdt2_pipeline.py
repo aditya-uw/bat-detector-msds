@@ -513,7 +513,7 @@ def convert_df_ravenpro(df: pd.DataFrame):
 
     return ravenpro_df
 
-def construct_activity_arr(cfg, data_params):
+def construct_activity_arr(cfg, data_params, save=True):
     """
     Constructs DataFrames corresponding to different important ways of storing activity for a deployment session.
     plot_df is an activity grid with date headers and time indices and number of detections as values.
@@ -571,7 +571,8 @@ def construct_activity_arr(cfg, data_params):
         activity_arr = activity_arr.set_index("date_and_time_UTC")
         activity_dets_arr = pd.concat([activity_dets_arr, activity_arr], axis=1)
 
-    activity_dets_arr.to_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv")
+    if save:
+        activity_dets_arr.to_csv(f"{data_params['output_dir']}/activity__{csv_tag}.csv")
 
     return activity_dets_arr
 
