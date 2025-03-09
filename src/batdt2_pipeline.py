@@ -700,7 +700,7 @@ def shape_activity_array_into_grid(cfg, data_params, group):
     activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", col_name])
     activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=col_name)
     activity_df.columns = pd.to_datetime(activity_df.columns).strftime('%m/%d/%y')
-    activity_df.to_csv(f"{data_params['output_dir']}/activity_plot__{group}{csv_tag}.csv")
+    activity_df.to_csv(f"{data_params['output_dir']}/{cfg['METRIC']}_plot__{group}{csv_tag}.csv")
 
     return activity_df
 
@@ -784,7 +784,7 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
     new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/{data_params['selection_of_dates']}/{data_params['site']}/{cfg['METRIC']}__*.csv", assume_missing=True).compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
 
-    resampled_df = new_df.resample(data_params["resample_tag"], on="date_and_time_UTC").sum().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
+    resampled_df = new_df.resample(data_params["resample_tag"], on="date_and_time_UTC").mean().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
 
     activity_datetimes = pd.to_datetime(resampled_df.index.values)
     raw_dates = activity_datetimes.date
@@ -798,9 +798,9 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
             middle_col.loc[middle_col<=1.0] = 0
         data = list(zip(raw_dates, raw_times, selected_group.sum(axis=1)))
     else:
-        data = list(zip(raw_dates, raw_times, resampled_df[f'{group}num_of_detections']))
-    activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", f'{group}num_of_detections'])
-    activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=f'{group}num_of_detections')
+        data = list(zip(raw_dates, raw_times, resampled_df[f'{group}{cfg["COL_TAG"]}']))
+    activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", f'{group}{cfg["COL_TAG"]}'])
+    activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=f'{group}{cfg["COL_TAG"]}')
     activity_df.columns = pd.to_datetime(activity_df.columns).strftime('%m/%d/%y')
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots/'
     if save:
@@ -1060,7 +1060,7 @@ def run_pipeline_for_session_with_df(cfg):
                 activity_df = shape_activity_array_into_grid(cfg, data_params, group)
                 plot_activity_grid(activity_df, data_params, group, save=True)
                 if data_params["site"] != "(Site not found in Field Records)":
-                    data_params['selection_of_dates'] = 'recover-2024*'
+                    data_params['selection_of_dates'] = 'recover-2025*'
                     cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
                     data_params['show_PST'] = False
                     plot_cumulative_activity(cumulative_activity_df, data_params, group)
