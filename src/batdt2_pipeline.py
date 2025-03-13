@@ -783,9 +783,12 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
 
     new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/{data_params['selection_of_dates']}/{data_params['site']}/{cfg['METRIC']}__*.csv", assume_missing=True).compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
-
-    resampled_df = new_df.resample(data_params["resample_tag"], on="date_and_time_UTC").mean().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
-
+    new_df = new_df.set_index('date_and_time_UTC')
+    
+    expected_dts = pd.date_range(new_df.iloc[0].name, new_df.iloc[-1].name, freq='10min')
+    valid_nan_df = new_df.reindex(expected_dts, fill_value=np.NaN).reset_index()
+    resampled_df = valid_nan_df.resample(data_params["resample_tag"], on="index").mean().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left').dropna()
+    
     activity_datetimes = pd.to_datetime(resampled_df.index.values)
     raw_dates = activity_datetimes.date
     raw_times = activity_datetimes.strftime("%H:%M")
