@@ -784,6 +784,7 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
     new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/{data_params['selection_of_dates']}/{data_params['site']}/{cfg['METRIC']}__*.csv", assume_missing=True).compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
     new_df = new_df.set_index('date_and_time_UTC')
+    new_df = new_df[~new_df.index.duplicated(keep='first')]
     
     expected_dts = pd.date_range(new_df.iloc[0].name, new_df.iloc[-1].name, freq='10min')
     valid_nan_df = new_df.reindex(expected_dts, fill_value=np.NaN).reset_index()
@@ -864,13 +865,13 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
 
     plt.rcParams.update({'font.size': 2*len(plot_dates)**0.5})
     plt.figure(figsize=(len(plot_dates)/4, len(plot_times)/4))
-    plt.title(f"{plot_title}Activity ({cfg['METRIC_TAG']}) from {data_params['site']}", loc='center', y=1.05, fontsize=(3)*len(plot_dates)**0.5)
+    plt.title(f"{plot_title}Activity ({data_params['METRIC_TAG']}) from {data_params['site']}", loc='center', y=1.05, fontsize=(3)*len(plot_dates)**0.5)
     plt.plot(np.arange(0, len(plot_dates)), ((sunset_seconds_from_midnight / (30*60)) % len(plot_times)) - 0.5, 
             color='white', linewidth=5, linestyle='dashed', label=f'Time of Sunset (Recent: {recent_sunset} PST)')
     plt.axhline(y=14-0.5, linewidth=5, linestyle='dashed', color='white', label='Midnight 0:00 PST')
     plt.plot(np.arange(0, len(plot_dates)), ((sunrise_seconds_from_midnight / (30*60)) % len(plot_times)) - 0.5, 
             color='white', linewidth=5, linestyle='dashed', label=f'Time of Sunrise (Recent: {recent_sunrise} PST)')
-    plt.imshow(plot_df, cmap=cmap, norm=colors.LogNorm(vmin=1e-1, vmax=cfg['UPPER_LIM']))
+    plt.imshow(plot_df, cmap=cmap, norm=colors.LogNorm(vmin=1e-1, vmax=data_params['UPPER_LIM']))
     plt.yticks(np.arange(0, len(plot_times))-0.5, plot_times, rotation=30)
     plt.xticks(np.arange(0, len(plot_dates))-0.5, plot_dates, rotation=30)
     plt.ylabel(f'{ylabel} Time (HH:MM)')
@@ -881,7 +882,7 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
     plt.tight_layout()
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots'
     if save:
-        plt.savefig(f'{cum_plots_dir}/cumulative_{cfg["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
+        plt.savefig(f'{cum_plots_dir}/cumulative_{data_params["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
                     bbox_inches='tight')
     plt.show()
 
@@ -1066,6 +1067,9 @@ def run_pipeline_for_session_with_df(cfg):
                     data_params['selection_of_dates'] = 'recover-2025*'
                     cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
                     data_params['show_PST'] = False
+                    data_params['UPPER_LIM'] = cfg['UPPER_LIM']
+                    data_params['METRIC_TAG'] = cfg['METRIC_TAG']
+                    data_params['METRIC'] = cfg['METRIC']
                     plot_cumulative_activity(cumulative_activity_df, data_params, group)
 
     return bd_preds
