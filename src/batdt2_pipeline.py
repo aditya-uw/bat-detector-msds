@@ -789,20 +789,14 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
     expected_dts = pd.date_range(new_df.iloc[0].name, new_df.iloc[-1].name, freq='10min')
     valid_nan_df = new_df.reindex(expected_dts, fill_value=np.NaN).reset_index()
     resampled_df = valid_nan_df.resample(data_params["resample_tag"], on="index").mean().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left').dropna()
-    
-    activity_datetimes = pd.to_datetime(resampled_df.index.values)
+    expected_dts = pd.date_range(resampled_df.iloc[0].name, resampled_df.iloc[-1].name, freq='30min')
+    valid_resampled_nan_df = resampled_df.reindex(expected_dts, fill_value=np.NaN)
+
+    activity_datetimes = pd.to_datetime(valid_resampled_nan_df.index.values)
     raw_dates = activity_datetimes.date
     raw_times = activity_datetimes.strftime("%H:%M")
-    mask = resampled_df.columns.str.contains(f'{group}.*')
-    if group!='':
-        mask = resampled_df.columns.str.contains(f'{group}.*')
-        selected_group = resampled_df.loc[:,mask]
-        if selected_group.shape[1]>2:
-            middle_col = selected_group.iloc[:,1]
-            middle_col.loc[middle_col<=1.0] = 0
-        data = list(zip(raw_dates, raw_times, selected_group.sum(axis=1)))
-    else:
-        data = list(zip(raw_dates, raw_times, resampled_df[f'{group}{cfg["COL_TAG"]}']))
+    mask = valid_resampled_nan_df.columns.str.contains(f'{group}.*')
+    data = list(zip(raw_dates, raw_times, valid_resampled_nan_df[f'{group}{cfg["COL_TAG"]}']))
     activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", f'{group}{cfg["COL_TAG"]}'])
     activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=f'{group}{cfg["COL_TAG"]}')
     activity_df.columns = pd.to_datetime(activity_df.columns).strftime('%m/%d/%y')
@@ -871,7 +865,10 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
     plt.axhline(y=14-0.5, linewidth=5, linestyle='dashed', color='white', label='Midnight 0:00 PST')
     plt.plot(np.arange(0, len(plot_dates)), ((sunrise_seconds_from_midnight / (30*60)) % len(plot_times)) - 0.5, 
             color='white', linewidth=5, linestyle='dashed', label=f'Time of Sunrise (Recent: {recent_sunrise} PST)')
-    plt.imshow(plot_df, cmap=cmap, norm=colors.LogNorm(vmin=1e-1, vmax=data_params['UPPER_LIM']))
+    if data_params['METRIC_TAG']=='CR':
+        plt.imshow(plot_df, cmap=cmap, norm=colors.LogNorm(vmin=1e-1, vmax=data_params['UPPER_LIM']))
+    else:
+        plt.imshow(plot_df, cmap=cmap, vmin=0, vmax=1e2)
     plt.yticks(np.arange(0, len(plot_times))-0.5, plot_times, rotation=30)
     plt.xticks(np.arange(0, len(plot_dates))-0.5, plot_dates, rotation=30)
     plt.ylabel(f'{ylabel} Time (HH:MM)')
