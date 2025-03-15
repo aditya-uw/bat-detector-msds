@@ -802,7 +802,8 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
     activity_df.columns = pd.to_datetime(activity_df.columns).strftime('%m/%d/%y')
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots/'
     if save:
-        activity_df.to_csv(f'{cum_plots_dir}/cumulative_{cfg["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
+        (Path(cum_plots_dir)/cfg["METRIC"]).mkdir(parents=True, exist_ok=True)
+        activity_df.to_csv(f'{cum_plots_dir}/{cfg["METRIC"]}/cumulative_{cfg["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
 
     return activity_df
 
@@ -879,6 +880,7 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
     plt.tight_layout()
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots'
     if save:
+        (Path(cum_plots_dir)/data_params["METRIC"]).mkdir(parents=True, exist_ok=True)
         plt.savefig(f'{cum_plots_dir}/{data_params["METRIC"]}/cumulative_{data_params["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
                     bbox_inches='tight')
     plt.show()
