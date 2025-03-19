@@ -172,6 +172,7 @@ def generate_files_df(cfg):
     print(f"Created site name column!")
     files_df.insert(0, "datetime_UTC", pd.to_datetime(files_df[file_path_column_name], format="%Y%m%d_%H%M%S", exact=False))
     print(f"Created datetime column!")
+    print(f'Process is done!')
 
     files_df.to_csv(cfg['output_dir'] / cfg["csv_name"])
 
