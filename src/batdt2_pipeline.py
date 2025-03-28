@@ -1100,7 +1100,7 @@ def get_params_relevant_to_data(cfg):
 
     data_params['ref_audio_files'] = sorted(list(files_from_deployment_session["file_path"].apply(lambda x : Path(x)).values))
     file_status_cond = files_from_deployment_session["file_status"] == "Usable for detection"
-    file_duration_cond = files_from_deployment_session["file_duration"].astype('float') >= (cfg['duration'])
+    file_duration_cond = files_from_deployment_session["file_duration"].astype('float') >= (cfg['duration'] - 1)
     good_deploy_session_df = files_from_deployment_session.loc[file_status_cond & file_duration_cond]
     data_params['good_audio_files'] = sorted(list(good_deploy_session_df["file_path"].apply(lambda x : Path(x)).values))
 
