@@ -534,7 +534,7 @@ def convert_df_ravenpro(df: pd.DataFrame):
     return ravenpro_df
 
 def get_bout_params_from_location(raw_bd2_df,  data_params):
-    raw_bd2_df = raw_bd2_df[(raw_bd2_df['det_prob']>=0.35)&(raw_bd2_df['SNR']>=3)]
+    raw_bd2_df = raw_bd2_df[(raw_bd2_df['det_prob']>=data_params['detection_threshold_for_activity'])&(raw_bd2_df['SNR']>=data_params['SNR_threshold_for_activity'])]
     raw_bd2_df = raw_bd2_df.rename(columns={'KMEANS_CLASSES': 'freq_group'})
     file_dts = pd.to_datetime(raw_bd2_df['input_file'], format='%Y%m%d_%H%M%S', exact=False)
 
@@ -551,9 +551,9 @@ def get_bout_params_from_location(raw_bd2_df,  data_params):
     bout_params = bt.get_bout_params_from_location(valid_df, data_params)
     return bout_params
 
-def prepare_and_threshold_dets_for_activity(raw_bd2dets):
+def prepare_and_threshold_dets_for_activity(raw_bd2dets, data_params):
     raw_bd2dets['freq_group'] = raw_bd2dets['KMEANS_CLASSES']
-    file_dets = raw_bd2dets[(raw_bd2dets['det_prob']>=0.35)&(raw_bd2dets['SNR']>=3)].copy()
+    file_dets = raw_bd2dets[(raw_bd2dets['det_prob']>=data_params['detection_threshold_for_activity'])&(raw_bd2dets['SNR']>=data_params['SNR_threshold_for_activity'])].copy()
     file_dets['freq_group'] = file_dets['KMEANS_CLASSES']
     file_dts = pd.to_datetime(file_dets['input_file'], format='%Y%m%d_%H%M%S', exact=False)
 
@@ -657,7 +657,7 @@ def construct_activity_arr(cfg, data_params, save=True):
         actvt_group_callrate_arr = actvt_group_callrate_arr.set_index("date_and_time_UTC")
         activity_callrate_arr = pd.concat([activity_callrate_arr, actvt_group_callrate_arr], axis=1)
 
-        valid_df = prepare_and_threshold_dets_for_activity(freq_group_df)
+        valid_df = prepare_and_threshold_dets_for_activity(freq_group_df, data_params)
         btp_per_file = get_btp_per_file_from_freq_group_df(valid_df, data_params, cfg)
         actvt_group_btp = btp_per_file.reindex(good_datetimes, fill_value=nodets).reindex(ref_datetimes, fill_value=np.NaN)
         actvt_group_btp_arr = pd.DataFrame(list(zip(activity_datetimes_for_file, actvt_group_btp)), columns=["date_and_time_UTC", f"{group}bout_time_percentage"])
