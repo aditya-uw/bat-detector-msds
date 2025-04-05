@@ -195,27 +195,27 @@ def get_related_field_records(recover_date):
     datetime_of_recovery = dt.datetime.strptime(recover_date, "%Y%m%d")
     
     if str(datetime_of_recovery.year) == "2021":
-        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2021.csv"))
+        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../../ubna-field/field_records/ubna_2021.csv"))
     if str(datetime_of_recovery.year) == "2022":
         if datetime_of_recovery < dt.datetime.strptime('20220715', "%Y%m%d"):
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022a.csv"))
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../../ubna-field/field_records/ubna_2022a.csv"))
         else:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../../ubna-field/field_records/ubna_2022b.csv"))
     if str(datetime_of_recovery.year) == "2023":
         if (datetime_of_recovery.month) >= 5:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../../ubna-field/field_records/ubna_2023.csv"))
         else:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2022b.csv"))
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../../ubna-field/field_records/ubna_2022b.csv"))
     if str(datetime_of_recovery.year) == "2024":
         if (datetime_of_recovery.month) <= 5:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2023.csv"))
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../../ubna-field/field_records/ubna_2023.csv"))
         else:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2024.csv"))
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../../ubna-field/field_records/ubna_2024.csv"))
     if str(datetime_of_recovery.year) == "2025":
         if (datetime_of_recovery.month) < 3:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2024.csv"))
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../../ubna-field/field_records/ubna_2024.csv"))
         else:
-            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../field_records/ubna_2025.csv"))
+            df_fr = get_field_records(Path(f"{Path(__file__).parent}/../../ubna-field/field_records/ubna_2025.csv"))
 
     return df_fr
 
