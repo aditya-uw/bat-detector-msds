@@ -1269,7 +1269,7 @@ if __name__ == "__main__":
     args = parse_args()
     
     detector_args = dict()
-    detector_args['detection_threshold'] = 0.20
+    detector_args['detection_threshold'] = 0.30
     detector_args['chunk_size'] = 2
 
     cfg = dict()
