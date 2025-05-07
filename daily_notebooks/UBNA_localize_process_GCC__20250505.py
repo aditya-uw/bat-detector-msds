@@ -34,7 +34,7 @@ C = 343 # m/s speed of sound in air
 FS = 250000
 SNR_CALC_LENGTH = 0.030
 SNR_OFFSET_BEFORE_CALL = 0.015
-TIME_PAD_FOR_ECHO = 0.001
+TIME_PAD_FOR_ECHO = 0.002
 CORR_LENGTH = 0.025
 NUM_CHANNELS_TOTAL = 8
 FILE_DURATION = 600
@@ -77,7 +77,7 @@ def get_snr_from_band_limited_signal(snr_call_signal, snr_noise_signal):
 
     signal_power_rms = np.sqrt(np.square(snr_call_signal).mean())
     noise_power_rms = np.sqrt(np.square(snr_noise_signal).mean())
-    snr = abs(20 * np.log10(signal_power_rms / noise_power_rms))
+    snr = (20 * np.log10(signal_power_rms / noise_power_rms))
 
     return snr
 
