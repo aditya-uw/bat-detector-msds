@@ -34,7 +34,7 @@ C = 343 # m/s speed of sound in air
 FS = 250000
 SNR_CALC_LENGTH = 0.030
 SNR_OFFSET_BEFORE_CALL = 0.015
-TIME_PAD_FOR_ECHO = 0.002
+TIME_PAD_FOR_ECHO = 0.001
 CORR_LENGTH = 0.025
 NUM_CHANNELS_TOTAL = 8
 FILE_DURATION = 600
@@ -448,7 +448,7 @@ def plot_colored_dets_over_audio(audio_features, spec_features, plot_dets):
     plt.xlabel("Time (s)")
     plt.show()
 
-def get_dets_observed_from_all_channels(microphones_used, file_dir, file_offset):
+def get_dets_observed_from_all_channels(file_dir, file_offset):
     FILE_TIME_TAG = f'{int(file_offset)}to{int(file_offset+FILE_DURATION)}'
     dir_name = f'{HOUR_TAG}_{FILE_TIME_TAG}'
     write_dir = file_dir / dir_name
@@ -531,7 +531,7 @@ def extract_reference_call_only(ref_call_segment, approx_call_dur):
 def extract_approx_call_windows_for_snr_calcs(filtered_det, call_start, call_dur):
     call_end = (call_start+call_dur)
     found_call = filtered_det[max(0, call_start):min(call_end, len(filtered_det))]
-    found_echo = filtered_det[min(call_end+ECHO_PAD, len(filtered_det)-1):]
+    found_echo = filtered_det[min(call_end+ECHO_PAD, len(filtered_det)-1):min(call_end+ECHO_PAD+call_dur, len(filtered_det))]
     found_background = filtered_det[max(0, call_start-call_dur):call_start]
     return found_call, found_background, found_echo
 
