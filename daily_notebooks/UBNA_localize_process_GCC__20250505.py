@@ -44,7 +44,7 @@ ZMAG_REF_TO_7 = 31.6875
 XMAG_REF_TO_1 = 17.7
 YMAG_REF_TO_6 = 21
 YMAG_REF_TO_1 = 37.5
-A_LOCS_MAT = np.array([[-XMAG_REF_TO_1, -YMAG_REF_TO_1, ZMAG_REF_TO_7],
+A_LOCS_MAT = (254/10000) * np.array([[-XMAG_REF_TO_1, -YMAG_REF_TO_1, ZMAG_REF_TO_7],
                     [-XMAG_REF_TO_1, YMAG_REF_TO_1, ZMAG_REF_TO_7],
                     [-XMAG_REF_TO_1, -YMAG_REF_TO_1, 0],
                     [-XMAG_REF_TO_1, YMAG_REF_TO_1, 0],
