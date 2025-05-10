@@ -32,7 +32,7 @@ import bout.assembly as bt
 
 C = 343 # m/s speed of sound in air
 FS = 250000
-SNR_CALC_LENGTH = 0.030
+SNR_CALC_LENGTH = 0.050
 SNR_OFFSET_BEFORE_CALL = 0.015
 TIME_PAD_FOR_ECHO = 0.002
 CORR_LENGTH = 0.025
