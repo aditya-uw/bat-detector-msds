@@ -144,3 +144,6 @@ dmypy.json
 nohup.out
 
 ubna_data_*.csv
+
+# Developer folder
+daily_notebooks
