@@ -216,7 +216,10 @@ def get_related_field_records(recover_date):
             df_fr = get_field_records(Path(f"{Path(__file__).parent}/../../ubna-field/field_records/ubna_2024.csv"))
         else:
             df_fr = get_field_records(Path(f"{Path(__file__).parent}/../../ubna-field/field_records/ubna_2025.csv"))
+    if str(datetime_of_recovery.year) == "2026":
+        df_fr = get_field_records(Path(f"{Path(__file__).parent}/../../ubna-field/field_records/ubna_2026.csv"))
 
+    
     return df_fr
 
 def get_audiomoth_sd_card(DATE, SD_CARD_NUM):
