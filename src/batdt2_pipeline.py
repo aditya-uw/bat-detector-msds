@@ -582,7 +582,7 @@ def get_callrate_per_file_from_freq_group_df(freq_group_df, cfg):
     return callrate_per_file
 
 def get_btp_per_file_from_freq_group_df(valid_df, data_params, cfg):
-    all_site_bd2_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2025*/{SITE_NAMES[data_params['site_tag']]}/bd2__*.csv").compute()
+    all_site_bd2_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2026*/{SITE_NAMES[data_params['site_tag']]}/bd2__*.csv").compute()
     bout_params = get_bout_params_from_location(all_site_bd2_df, data_params)
     batdetect2_preds_with_bouttags = bt.classify_bouts_in_detector_preds_for_freqgroups(valid_df, bout_params)
     bout_metrics = bt.construct_bout_metrics_from_location_df_for_freqgroups(batdetect2_preds_with_bouttags)
