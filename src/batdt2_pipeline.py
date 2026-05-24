@@ -1063,7 +1063,7 @@ def run_pipeline_for_session_with_df(cfg):
                 activity_df = shape_activity_array_into_grid(cfg, data_params, group)
                 plot_activity_grid(activity_df, data_params, group, save=True)
                 if data_params["site"] != "(Site not found in Field Records)":
-                    data_params['selection_of_dates'] = 'recover-2025*'
+                    data_params['selection_of_dates'] = 'recover-2026*'
                     cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
                     data_params['show_PST'] = False
                     data_params['UPPER_LIM'] = cfg['UPPER_LIM']
