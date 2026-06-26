@@ -144,6 +144,8 @@ dmypy.json
 nohup.out
 
 ubna_data_*.csv
+output_dir/recover-20260504/'Telephone Field'/bd2__recover-20260504_UBNA_028.csv
+output_dir/recover-20260601/'Carp Pond'/bd2__recover-20260601_UBNA_032.csv
 
 # Developer folder
 daily_notebooks
