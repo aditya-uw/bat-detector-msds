@@ -26,8 +26,10 @@ def get_SD_card_from_filepath(filepath):
 
 def get_SD_unit_from_filepath(filepath):
     sd_card = get_SD_card_from_filepath(filepath)
-    if "UBNA" in sd_card:
+    if ("UBNA" in sd_card):
         sd_unit = sd_card.split('_')[-1]
+    elif ("STF" in sd_card):
+        sd_unit = sd_card
     else:
         sd_unit = sd_card[-1]
     return sd_unit
@@ -69,7 +71,7 @@ def get_file_comment(filepath):
 
 def generate_files_df(cfg):
 
-    raw_files = Path(cfg['input_dir']).glob(pattern='recover-*/**/*.WAV')
+    raw_files = Path(cfg['input_dir']).glob(pattern='recover-*/**/2*.WAV')
     clean_files = []
     for filepath in raw_files:
         if not('trash' in str(filepath).lower()):
