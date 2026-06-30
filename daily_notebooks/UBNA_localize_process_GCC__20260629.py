@@ -104,26 +104,6 @@ def plot_audio_seg_spectrogram(audio_features, spec_features):
     plt.show()
     
 
-def extract_reference_call_only(ref_call_segment, approx_call_dur):
-    mpl_specgram_window = plt.mlab.window_hanning(np.ones(SPEC_NFFT))
-    f, t, Sxx = scipy.signal.spectrogram(ref_call_segment, FS, detrend=False,
-                                nfft=SPEC_NFFT, 
-                                window=mpl_specgram_window)
-    Sxx[np.where(Sxx==0)] = 1e-16 ### <--- replace all zeros with very small values (-160dB) outside of the scale to avoid taking log10(0)
-    plt_Sxx = 10*np.log10(Sxx)
-    max_ind = np.where(plt_Sxx==np.max(plt_Sxx))
-    max_value_across_bins = Sxx[max_ind]
-    peak_freq = f[max_ind[0]]
-    peak_freq_time = t[max_ind[1]]
-
-    found_call_dur = int(FS*(0.008))
-    found_call_start = int(FS*(peak_freq_time[0] - 0.004))
-    
-    found_call_end = (found_call_start+found_call_dur)
-    ref_mic_call_only = ref_call_segment[found_call_start:found_call_end]
-
-    return ref_mic_call_only, found_call_start/FS, found_call_dur/FS
-
 def index_reference_call_based_on_feature_to_maximize(calls, detection_index, feature):
     return calls[detection_index, np.argmax(feature[detection_index]),:], np.argmax(feature[detection_index])
 
@@ -581,11 +561,24 @@ def extract_call_starts_for_call(call_segment, approx_call_dur):
     return found_call_start, found_call_dur
 
 def extract_reference_call_only(ref_call_segment, approx_call_dur):
-    found_call_start, found_call_dur = extract_call_starts_for_call(ref_call_segment, approx_call_dur)
+    mpl_specgram_window = plt.mlab.window_hanning(np.ones(SPEC_NFFT))
+    f, t, Sxx = scipy.signal.spectrogram(ref_call_segment, FS, detrend=False,
+                                nfft=SPEC_NFFT, 
+                                window=mpl_specgram_window)
+    Sxx[np.where(Sxx==0)] = 1e-16 ### <--- replace all zeros with very small values (-160dB) outside of the scale to avoid taking log10(0)
+    plt_Sxx = 10*np.log10(Sxx)
+    max_ind = np.where(plt_Sxx==np.max(plt_Sxx))
+    max_value_across_bins = Sxx[max_ind]
+    peak_freq = f[max_ind[0]]
+    peak_freq_time = t[max_ind[1]]
+
+    found_call_dur = int(FS*(0.008))
+    found_call_start = int(FS*(peak_freq_time[0] - 0.004))
+    
     found_call_end = (found_call_start+found_call_dur)
     ref_mic_call_only = ref_call_segment[found_call_start:found_call_end]
 
-    return ref_mic_call_only
+    return ref_mic_call_only, found_call_start/FS, found_call_dur/FS
 
 def extract_approx_call_windows_for_snr_calcs(filtered_det, call_start, call_dur):
     call_end = (call_start+call_dur)
