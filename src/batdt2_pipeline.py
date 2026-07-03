@@ -582,7 +582,7 @@ def get_callrate_per_file_from_freq_group_df(freq_group_df, cfg):
     return callrate_per_file
 
 def get_btp_per_file_from_freq_group_df(valid_df, data_params, cfg):
-    all_site_bd2_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/recover-2026*/{data_params['site']}/bd2__*.csv").compute()
+    all_site_bd2_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/{data_params['cur_selection_of_dates']}*/{data_params['site']}/bd2__*.csv").compute()
     bout_params = get_bout_params_from_location(all_site_bd2_df, data_params)
     batdetect2_preds_with_bouttags = bt.classify_bouts_in_detector_preds_for_freqgroups(valid_df, bout_params)
     bout_metrics = bt.construct_bout_metrics_from_location_df_for_freqgroups(batdetect2_preds_with_bouttags)
@@ -803,7 +803,7 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots/'
     if save:
         (Path(cum_plots_dir)/cfg["METRIC"]).mkdir(parents=True, exist_ok=True)
-        activity_df.to_csv(f'{cum_plots_dir}/{cfg["METRIC"]}/cumulative_{cfg["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
+        activity_df.to_csv(f'{cum_plots_dir}/{cfg["METRIC"]}/cumulative_{data_params["selection_of_dates"][8:12]}{cfg["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
 
     return activity_df
 
@@ -881,7 +881,7 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots'
     if save:
         (Path(cum_plots_dir)/data_params["METRIC"]).mkdir(parents=True, exist_ok=True)
-        plt.savefig(f'{cum_plots_dir}/{data_params["METRIC"]}/cumulative_{data_params["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
+        plt.savefig(f'{cum_plots_dir}/{data_params["METRIC"]}/cumulative_{data_params["selection_of_dates"][8:12]}{data_params["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
                     bbox_inches='tight')
     plt.show()
 
@@ -1063,19 +1063,26 @@ def run_pipeline_for_session_with_df(cfg):
                 activity_df = shape_activity_array_into_grid(cfg, data_params, group)
                 plot_activity_grid(activity_df, data_params, group, save=True)
                 if data_params["site"] != "(Site not found in Field Records)":
-                    data_params['selection_of_dates'] = 'recover-2026*'
-                    cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
-                    data_params['show_PST'] = False
-                    data_params['UPPER_LIM'] = cfg['UPPER_LIM']
-                    data_params['METRIC_TAG'] = cfg['METRIC_TAG']
-                    data_params['METRIC'] = cfg['METRIC']
-                    plot_cumulative_activity(cumulative_activity_df, data_params, group)
+                    years = ['2023', '2024', '2025', '2026']
+                    for year in years:
+                        data_params['selection_of_dates'] = f'recover-{year}*'
+                        cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
+                        data_params['show_PST'] = False
+                        data_params['UPPER_LIM'] = cfg['UPPER_LIM']
+                        data_params['METRIC_TAG'] = cfg['METRIC_TAG']
+                        data_params['METRIC'] = cfg['METRIC']
+                        plot_cumulative_activity(cumulative_activity_df, data_params, group)
 
     return bd_preds
 
 def get_params_relevant_to_data(cfg):
     data_params = dict()
     data_params['recover_folder'] = cfg['recover_folder']
+    data_params['current_year_recovery'] = data_params['recover_folder'][8:12]
+    if int(data_params['current_year_recovery']) < 2026:
+        data_params['cur_selection_of_dates'] = f'recover-{data_params["current_year_recovery"]}_detections/recover-{data_params["current_year_recovery"]}'
+    else:
+        data_params['cur_selection_of_dates'] = f'recover-{data_params["current_year_recovery"]}'
     data_params["audiomoth_folder"] = f"UBNA_{cfg['sd_unit']}"
     print(f"Searching for files from {cfg['recover_folder']} and {data_params['audiomoth_folder']}")
 
