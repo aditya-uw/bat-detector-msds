@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+import matplotlib.ticker as mtick
 
 import datetime as dt
 from pathlib import Path
@@ -35,6 +36,10 @@ SITE_NAMES = {
             'Telephone' : "Telephone Field",
             'E18' : "E18 Bridge"
                 }
+
+SITES_FOR_YEARS = {'2025': ['Central Pond', 'Foliage', 'Telephone Field', 'Carp Pond', 'E18 Bridge'],
+                   '2026': ['Central Pond', 'Foliage', 'Telephone Field', 'Carp Pond', 'E18 Bridge']
+                   }
 
 FREQ_GROUPS = {
                 'E18 Bridge' : {'': [0, 96000],
@@ -755,7 +760,7 @@ def plot_activity_grid(plot_df, data_params, group, show_PST=False, save=True):
     if save:
         plt.savefig(f"{data_params['output_dir']}/{cfg['METRIC']}_plot__{group}{data_params['recover_folder']}_{data_params['audiomoth_folder']}.png", bbox_inches='tight', pad_inches=0.5)
     plt.tight_layout()
-    plt.show()
+    plt.close()
 
 def construct_cumulative_activity(data_params, cfg, group, save=True):
     """
@@ -803,7 +808,7 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots/'
     if save:
         (Path(cum_plots_dir)/cfg["METRIC"]).mkdir(parents=True, exist_ok=True)
-        activity_df.to_csv(f'{cum_plots_dir}/{cfg["METRIC"]}/cumulative_{data_params["selection_of_dates"][8:12]}{cfg["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
+        activity_df.to_csv(f'{cum_plots_dir}/{cfg["METRIC"]}/{data_params["selection_of_dates"][8:12]}/cumulative_{data_params["selection_of_dates"][8:12]}{cfg["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
 
     return activity_df
 
@@ -843,9 +848,9 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
     cmap = plt.get_cmap('viridis')
     cmap.set_bad(color='red')
     plot_dates = [''] * len(plot_df.columns)
-    plot_dates[::7] = plot_df.columns[::7]
+    plot_dates[::14] = plot_df.columns[::14]
     plot_times = [''] * len(activity_times)
-    plot_times[::3] = activity_times[::3]
+    plot_times[::6] = activity_times[::6]
 
     activity_dates = pd.to_datetime(plot_df.columns.values, format='%m/%d/%y')
     activity_lat = [SEATTLE_LATITUDE]*len(activity_dates)
@@ -858,9 +863,9 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
     recent_sunrise = sunrise_time.tz_convert(tz="US/Pacific").strftime("%H:%M")[-1]
     recent_sunset = sunset_time.tz_convert(tz="US/Pacific").strftime("%H:%M")[-1]
 
-    plt.rcParams.update({'font.size': 2*len(plot_dates)**0.5})
+    plt.rcParams.update({'font.size': 3*len(plot_dates)**0.5})
     plt.figure(figsize=(len(plot_dates)/4, len(plot_times)/4))
-    plt.title(f"{plot_title}Activity ({data_params['METRIC_TAG']}) from {data_params['site']}", loc='center', y=1.05, fontsize=(3)*len(plot_dates)**0.5)
+    plt.title(f"{plot_title}Activity ({data_params['METRIC_TAG']}) from {data_params['site']}", loc='center', y=1.05, fontsize=(4)*len(plot_dates)**0.5)
     plt.plot(np.arange(0, len(plot_dates)), ((sunset_seconds_from_midnight / (30*60)) % len(plot_times)) - 0.5, 
             color='white', linewidth=5, linestyle='dashed', label=f'Time of Sunset (Recent: {recent_sunset} PST)')
     plt.axhline(y=14-0.5, linewidth=5, linestyle='dashed', color='white', label='Midnight 0:00 PST')
@@ -874,16 +879,18 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
     plt.xticks(np.arange(0, len(plot_dates))-0.5, plot_dates, rotation=30)
     plt.ylabel(f'{ylabel} Time (HH:MM)')
     plt.xlabel('Date (MM/DD/YY)')
-    plt.colorbar()
-    plt.legend(loc=3, fontsize=(2*len(plot_dates)**0.5))
+    cbar = plt.colorbar()
+    if data_params['METRIC_TAG'] == 'BTP' or data_params['METRIC_TAG'] == 'AI':
+        cbar.ax.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=100))
+    # plt.legend(loc=3, fontsize=(2.5*len(plot_dates)**0.5))
     plt.grid(which='both')
     plt.tight_layout()
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots'
     if save:
         (Path(cum_plots_dir)/data_params["METRIC"]).mkdir(parents=True, exist_ok=True)
-        plt.savefig(f'{cum_plots_dir}/{data_params["METRIC"]}/cumulative_{data_params["selection_of_dates"][8:12]}{data_params["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
+        plt.savefig(f'{cum_plots_dir}/{data_params["METRIC"]}/{data_params["selection_of_dates"][8:12]}/cumulative_{data_params["selection_of_dates"][8:12]}{data_params["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
                     bbox_inches='tight')
-    plt.show()
+    plt.close()
 
 def delete_segments(necessary_paths):
     """
@@ -1063,15 +1070,19 @@ def run_pipeline_for_session_with_df(cfg):
                 activity_df = shape_activity_array_into_grid(cfg, data_params, group)
                 plot_activity_grid(activity_df, data_params, group, save=True)
                 if data_params["site"] != "(Site not found in Field Records)":
-                    years = ['2023', '2024', '2025', '2026']
+                    years = ['2025', '2026']
                     for year in years:
-                        data_params['selection_of_dates'] = f'recover-{year}*'
-                        cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
-                        data_params['show_PST'] = False
-                        data_params['UPPER_LIM'] = cfg['UPPER_LIM']
-                        data_params['METRIC_TAG'] = cfg['METRIC_TAG']
-                        data_params['METRIC'] = cfg['METRIC']
-                        plot_cumulative_activity(cumulative_activity_df, data_params, group)
+                        if data_params["site"] in SITES_FOR_YEARS[year]:
+                            if int(year) < 2026:
+                                data_params['selection_of_dates'] = f'recover-{year}_detections/recover-{year}*'
+                            else:
+                                data_params['selection_of_dates'] = f'recover-{year}*'
+                            cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
+                            data_params['show_PST'] = False
+                            data_params['UPPER_LIM'] = cfg['UPPER_LIM']
+                            data_params['METRIC_TAG'] = cfg['METRIC_TAG']
+                            data_params['METRIC'] = cfg['METRIC']
+                            plot_cumulative_activity(cumulative_activity_df, data_params, group)
 
     return bd_preds
 
