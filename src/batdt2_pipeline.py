@@ -1070,19 +1070,14 @@ def run_pipeline_for_session_with_df(cfg):
                 activity_df = shape_activity_array_into_grid(cfg, data_params, group)
                 plot_activity_grid(activity_df, data_params, group, save=True)
                 if data_params["site"] != "(Site not found in Field Records)":
-                    years = ['2025', '2026']
-                    for year in years:
-                        if data_params["site"] in SITES_FOR_YEARS[year]:
-                            if int(year) < 2026:
-                                data_params['selection_of_dates'] = f'recover-{year}_detections/recover-{year}*'
-                            else:
-                                data_params['selection_of_dates'] = f'recover-{year}*'
-                            cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
-                            data_params['show_PST'] = False
-                            data_params['UPPER_LIM'] = cfg['UPPER_LIM']
-                            data_params['METRIC_TAG'] = cfg['METRIC_TAG']
-                            data_params['METRIC'] = cfg['METRIC']
-                            plot_cumulative_activity(cumulative_activity_df, data_params, group)
+                    year = '2026'
+                    data_params['selection_of_dates'] = f'recover-{year}*'
+                    cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
+                    data_params['show_PST'] = False
+                    data_params['UPPER_LIM'] = cfg['UPPER_LIM']
+                    data_params['METRIC_TAG'] = cfg['METRIC_TAG']
+                    data_params['METRIC'] = cfg['METRIC']
+                    plot_cumulative_activity(cumulative_activity_df, data_params, group)
 
     return bd_preds
 
