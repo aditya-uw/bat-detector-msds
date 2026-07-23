@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_c79bdd3f748e3620949e46ebce6e801c {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    <script src="https://cdn.jsdelivr.net/gh/ljagis/leaflet-measure@2.1.7/dist/leaflet-measure.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ljagis/leaflet-measure@2.1.7/dist/leaflet-measure.min.css"/>
+</head>
+<body>
+    
+    
+<div style="
+    position: fixed;
+    bottom: 40px;
+    left: 40px;
+    z-index: 9999;
+    background-color: white;
+    border: 2px solid #777;
+    border-radius: 5px;
+    padding: 10px 14px;
+    font-size: 14px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+">
+    <div style="font-weight: bold; margin-bottom: 8px;">Legend</div>
+
+    <div style="display: flex; align-items: center; margin-bottom: 6px;">
+        <span style="
+            display: inline-block;
+            width: 18px;
+            margin-right: 8px;
+            color: black;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        ">X</span>
+        <span>Microphone</span>
+    </div>
+
+    <div style="display: flex; align-items: center;">
+        <span style="
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            margin-left: 4px;
+            margin-right: 12px;
+            background-color: cyan;
+            border: 1px solid black;
+            border-radius: 50%;
+        "></span>
+        <span>Playback test #4 localization</span>
+    </div>
+</div>
+    
+            <div class="folium-map" id="map_c79bdd3f748e3620949e46ebce6e801c" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_c79bdd3f748e3620949e46ebce6e801c = L.map(
+                "map_c79bdd3f748e3620949e46ebce6e801c",
+                {
+                    center: [47.65461827, -122.29515367],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 19,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+            L.control.scale().addTo(map_c79bdd3f748e3620949e46ebce6e801c);
+
+            
+
+        
+    
+            var tile_layer_5a8c85d5805001bd8d82837a9af9f324 = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 24,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u00a9 OpenStreetMap contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_5a8c85d5805001bd8d82837a9af9f324.addTo(map_c79bdd3f748e3620949e46ebce6e801c);
+        
+    
+            var marker_3acb8eb681c8b48ea707826ed3d96c48 = L.marker(
+                [47.6549444444444, -122.294883333333],
+                {
+}
+            ).addTo(map_c79bdd3f748e3620949e46ebce6e801c);
+        
+    
+            var div_icon_2397ed82177d7f7c91b9e7f2ef9caccc = L.divIcon({
+  "html": "\u003cdiv style=\"font-size: 16px; font-weight: bold; color: black; line-height: 16px; text-align: center;\"\u003eX\u003c/div\u003e",
+  "iconSize": [16, 16],
+  "iconAnchor": [8, 8],
+  "className": "empty",
+});
+        
+    
+            marker_3acb8eb681c8b48ea707826ed3d96c48.bindTooltip(
+                `<div>
+                     Microphone (E2)
+                 </div>`,
+                {
+  "direction": "right",
+  "offset": [8, 0],
+  "sticky": true,
+}
+            );
+        
+    
+                marker_3acb8eb681c8b48ea707826ed3d96c48.setIcon(div_icon_2397ed82177d7f7c91b9e7f2ef9caccc);
+            
+    
+            var marker_52165700056ea79027fd1d46f21c99d7 = L.marker(
+                [47.65444166666666, -122.294875],
+                {
+}
+            ).addTo(map_c79bdd3f748e3620949e46ebce6e801c);
+        
+    
+            var div_icon_5c748a6c3c1af36905ad491fa05fa008 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size: 16px; font-weight: bold; color: black; line-height: 16px; text-align: center;\"\u003eX\u003c/div\u003e",
+  "iconSize": [16, 16],
+  "iconAnchor": [8, 8],
+  "className": "empty",
+});
+        
+    
+            marker_52165700056ea79027fd1d46f21c99d7.bindTooltip(
+                `<div>
+                     Microphone (E4)
+                 </div>`,
+                {
+  "direction": "right",
+  "offset": [8, 0],
+  "sticky": true,
+}
+            );
+        
+    
+                marker_52165700056ea79027fd1d46f21c99d7.setIcon(div_icon_5c748a6c3c1af36905ad491fa05fa008);
+            
+    
+            var marker_10e668338fbcd25de8f0a1367a78b279 = L.marker(
+                [47.6548388888889, -122.295538888889],
+                {
+}
+            ).addTo(map_c79bdd3f748e3620949e46ebce6e801c);
+        
+    
+            var div_icon_77cddfe6be8d4dbeacadc8f40bd7c818 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size: 16px; font-weight: bold; color: black; line-height: 16px; text-align: center;\"\u003eX\u003c/div\u003e",
+  "iconSize": [16, 16],
+  "iconAnchor": [8, 8],
+  "className": "empty",
+});
+        
+    
+            marker_10e668338fbcd25de8f0a1367a78b279.bindTooltip(
+                `<div>
+                     Microphone (E8)
+                 </div>`,
+                {
+  "direction": "right",
+  "offset": [8, 0],
+  "sticky": true,
+}
+            );
+        
+    
+                marker_10e668338fbcd25de8f0a1367a78b279.setIcon(div_icon_77cddfe6be8d4dbeacadc8f40bd7c818);
+            
+    
+            var marker_cc9e05bad5db306675e0fd935db40309 = L.marker(
+                [47.6542861111111, -122.295294444444],
+                {
+}
+            ).addTo(map_c79bdd3f748e3620949e46ebce6e801c);
+        
+    
+            var div_icon_4ef023061af1a70c348a3b97d68fb8f9 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size: 16px; font-weight: bold; color: black; line-height: 16px; text-align: center;\"\u003eX\u003c/div\u003e",
+  "iconSize": [16, 16],
+  "iconAnchor": [8, 8],
+  "className": "empty",
+});
+        
+    
+            marker_cc9e05bad5db306675e0fd935db40309.bindTooltip(
+                `<div>
+                     Microphone (E9)
+                 </div>`,
+                {
+  "direction": "right",
+  "offset": [8, 0],
+  "sticky": true,
+}
+            );
+        
+    
+                marker_cc9e05bad5db306675e0fd935db40309.setIcon(div_icon_4ef023061af1a70c348a3b97d68fb8f9);
+            
+    
+            var circle_marker_b5f3c251e6fc6c278bf26e2e21a1be27 = L.circleMarker(
+                [47.65487057867976, -122.29562227156244],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
+            ).addTo(map_c79bdd3f748e3620949e46ebce6e801c);
+        
+    
+            circle_marker_b5f3c251e6fc6c278bf26e2e21a1be27.bindTooltip(
+                `<div>
+                     Playback 1<br>East: -6.25 m<br>North: 3.52 m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_7eef110f4361de78f2c05f08dd6b84a7 = L.circleMarker(
+                [47.65487061960134, -122.29562702101306],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
+            ).addTo(map_c79bdd3f748e3620949e46ebce6e801c);
+        
+    
+            circle_marker_7eef110f4361de78f2c05f08dd6b84a7.bindTooltip(
+                `<div>
+                     Playback 2<br>East: -6.60 m<br>North: 3.53 m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_dac28b0c44c22f00195caca91f6329d9 = L.circleMarker(
+                [47.654870231433534, -122.29562817810627],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
+            ).addTo(map_c79bdd3f748e3620949e46ebce6e801c);
+        
+    
+            circle_marker_dac28b0c44c22f00195caca91f6329d9.bindTooltip(
+                `<div>
+                     Playback 3<br>East: -6.69 m<br>North: 3.49 m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_3e2cf748f75b2db00a766e9013e9aca9 = L.circleMarker(
+                [47.65487069372871, -122.29562968811364],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
+            ).addTo(map_c79bdd3f748e3620949e46ebce6e801c);
+        
+    
+            circle_marker_3e2cf748f75b2db00a766e9013e9aca9.bindTooltip(
+                `<div>
+                     Playback 4<br>East: -6.80 m<br>North: 3.54 m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_259b32ed8bba6899287f3218680ff268 = L.circleMarker(
+                [47.65484115838982, -122.2955962983001],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
+            ).addTo(map_c79bdd3f748e3620949e46ebce6e801c);
+        
+    
+            circle_marker_259b32ed8bba6899287f3218680ff268.bindTooltip(
+                `<div>
+                     Playback 5<br>East: -4.30 m<br>North: 0.25 m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var measure_control_b8065833d81aa85bc6bd3f85f3e93933 = new L.Control.Measure(
+                {
+  "position": "topleft",
+  "primaryLengthUnit": "meters",
+  "secondaryLengthUnit": "feet",
+  "primaryAreaUnit": "sqmeters",
+  "secondaryAreaUnit": "acres",
+});
+            map_c79bdd3f748e3620949e46ebce6e801c.addControl(measure_control_b8065833d81aa85bc6bd3f85f3e93933);
+
+            // Workaround for using this plugin with Leaflet>=1.8.0
+            // https://github.com/ljagis/leaflet-measure/issues/171
+            L.Control.Measure.include({
+                _setCaptureMarkerIcon: function () {
+                    // disable autopan
+                    this._captureMarker.options.autoPanOnFocus = false;
+                    // default function
+                    this._captureMarker.setIcon(
+                        L.divIcon({
+                            iconSize: this._map.getSize().multiplyBy(2)
+                        })
+                    );
+                },
+            });
+
+        
+</script>
+</html>
