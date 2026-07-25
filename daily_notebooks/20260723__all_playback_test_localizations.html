@@ -23,7 +23,7 @@
             <meta name="viewport" content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
-                #map_5bfd6418180e943c6aa6d0d8c0b5ff45 {
+                #map_970baae04134c403a9d2e7ec0fb694d5 {
                     position: relative;
                     width: 100.0%;
                     height: 100.0%;
@@ -58,6 +58,12 @@
         
     <script src="https://cdn.jsdelivr.net/gh/ljagis/leaflet-measure@2.1.7/dist/leaflet-measure.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/ljagis/leaflet-measure@2.1.7/dist/leaflet-measure.min.css"/>
+    
+<style>
+.leaflet-control-scale-line {
+    font-size: 18px !important;
+}
+</style>
 </head>
 <body>
     
@@ -116,14 +122,76 @@
     
 </div>
     
-            <div class="folium-map" id="map_5bfd6418180e943c6aa6d0d8c0b5ff45" ></div>
+            <div class="folium-map" id="map_970baae04134c403a9d2e7ec0fb694d5" ></div>
         
+    
+<div style="position:fixed; bottom:60px; left:40px; z-index:9999;
+            background-color:white; border:2px solid #777; border-radius:5px;
+            padding:10px 14px; font-size:18px;
+            box-shadow:0 1px 5px rgba(0,0,0,0.35);">
+    <div style="font-weight:bold; margin-bottom:8px;">Legend</div>
+    <div style="display:flex; align-items:center;">
+        <span style="display:inline-block; width:18px; margin-right:8px;
+                     color:black; font-size:18px; font-weight:bold;
+                     text-align:center;">X</span>
+        <span>Microphone</span>
+    </div>
+    
+    <div style="display:flex; align-items:center; margin-top:6px;">
+        <span style="display:inline-block; width:10px; height:10px;
+                     margin-left:4px; margin-right:12px;
+                     background-color:red; border:1px solid black;
+                     border-radius:50%;"></span>
+        <span>Playback test #1 localization (LOUD)</span>
+    </div>
+    
+    <div style="display:flex; align-items:center; margin-top:6px;">
+        <span style="display:inline-block; width:10px; height:10px;
+                     margin-left:4px; margin-right:12px;
+                     background-color:pink; border:1px solid black;
+                     border-radius:50%;"></span>
+        <span>Playback test #1 localization (MID)</span>
+    </div>
+    
+    <div style="display:flex; align-items:center; margin-top:6px;">
+        <span style="display:inline-block; width:10px; height:10px;
+                     margin-left:4px; margin-right:12px;
+                     background-color:blue; border:1px solid black;
+                     border-radius:50%;"></span>
+        <span>Playback test #2 localization (LOUD)</span>
+    </div>
+    
+    <div style="display:flex; align-items:center; margin-top:6px;">
+        <span style="display:inline-block; width:10px; height:10px;
+                     margin-left:4px; margin-right:12px;
+                     background-color:cyan; border:1px solid black;
+                     border-radius:50%;"></span>
+        <span>Playback test #2 localization (MID)</span>
+    </div>
+    
+    <div style="display:flex; align-items:center; margin-top:6px;">
+        <span style="display:inline-block; width:10px; height:10px;
+                     margin-left:4px; margin-right:12px;
+                     background-color:green; border:1px solid black;
+                     border-radius:50%;"></span>
+        <span>Playback test #3 localization (LOUD)</span>
+    </div>
+    
+    <div style="display:flex; align-items:center; margin-top:6px;">
+        <span style="display:inline-block; width:10px; height:10px;
+                     margin-left:4px; margin-right:12px;
+                     background-color:lightgreen; border:1px solid black;
+                     border-radius:50%;"></span>
+        <span>Playback test #3 localization (MID)</span>
+    </div>
+    
+</div>
 </body>
 <script>
     
     
-            var map_5bfd6418180e943c6aa6d0d8c0b5ff45 = L.map(
-                "map_5bfd6418180e943c6aa6d0d8c0b5ff45",
+            var map_970baae04134c403a9d2e7ec0fb694d5 = L.map(
+                "map_970baae04134c403a9d2e7ec0fb694d5",
                 {
                     center: [47.65495, -122.29575],
                     crs: L.CRS.EPSG3857,
@@ -135,13 +203,13 @@
 
                 }
             );
-            L.control.scale().addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            L.control.scale().addTo(map_970baae04134c403a9d2e7ec0fb694d5);
 
             
 
         
     
-            var tile_layer_802787562bd06777a51c4a2049ad04f6 = L.tileLayer(
+            var tile_layer_19ae9304db3dc20c7e3e1310a4272f15 = L.tileLayer(
                 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 {
   "minZoom": 0,
@@ -158,23 +226,23 @@
             );
         
     
-            tile_layer_802787562bd06777a51c4a2049ad04f6.addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            tile_layer_19ae9304db3dc20c7e3e1310a4272f15.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
         
     
-            var feature_group_4a5fdf5233a37f9d653c7cf5d3e3d3a2 = L.featureGroup(
+            var feature_group_03ef2caf8d042a02e2ca0ee331f4ed8d = L.featureGroup(
                 {
 }
             );
         
     
-            var marker_0cf55b06e6f7f8c915e6800d8d5d0569 = L.marker(
+            var marker_8cd35e524c9b2166f854b08243c6667d = L.marker(
                 [47.655728333333336, -122.29671333333333],
                 {
 }
-            ).addTo(feature_group_4a5fdf5233a37f9d653c7cf5d3e3d3a2);
+            ).addTo(feature_group_03ef2caf8d042a02e2ca0ee331f4ed8d);
         
     
-            var div_icon_1dce2a6a48c28930ef370ec77059b26c = L.divIcon({
+            var div_icon_43d2eee321b1405e41f42a3465dded9c = L.divIcon({
   "html": "\u003cdiv style=\"font-size:16px; font-weight:bold; color:black; line-height:16px; text-align:center;\"\u003eX\u003c/div\u003e",
   "iconSize": [16, 16],
   "iconAnchor": [8, 8],
@@ -182,7 +250,7 @@
 });
         
     
-            marker_0cf55b06e6f7f8c915e6800d8d5d0569.bindTooltip(
+            marker_8cd35e524c9b2166f854b08243c6667d.bindTooltip(
                 `<div>
                      Patch A — A1
                  </div>`,
@@ -194,17 +262,17 @@
             );
         
     
-                marker_0cf55b06e6f7f8c915e6800d8d5d0569.setIcon(div_icon_1dce2a6a48c28930ef370ec77059b26c);
+                marker_8cd35e524c9b2166f854b08243c6667d.setIcon(div_icon_43d2eee321b1405e41f42a3465dded9c);
             
     
-            var marker_2c8c6bfbc6435bcf61ccb6b4b1c054f7 = L.marker(
+            var marker_d8a59cfa9abc3aaeb0dd2608477aa32c = L.marker(
                 [47.655405, -122.29667],
                 {
 }
-            ).addTo(feature_group_4a5fdf5233a37f9d653c7cf5d3e3d3a2);
+            ).addTo(feature_group_03ef2caf8d042a02e2ca0ee331f4ed8d);
         
     
-            var div_icon_5ddcd10e4fbb9a3e116222c2a13b7a91 = L.divIcon({
+            var div_icon_d611ab9f59c2daf21a84447a1f735b97 = L.divIcon({
   "html": "\u003cdiv style=\"font-size:16px; font-weight:bold; color:black; line-height:16px; text-align:center;\"\u003eX\u003c/div\u003e",
   "iconSize": [16, 16],
   "iconAnchor": [8, 8],
@@ -212,7 +280,7 @@
 });
         
     
-            marker_2c8c6bfbc6435bcf61ccb6b4b1c054f7.bindTooltip(
+            marker_d8a59cfa9abc3aaeb0dd2608477aa32c.bindTooltip(
                 `<div>
                      Patch A — A4
                  </div>`,
@@ -224,17 +292,17 @@
             );
         
     
-                marker_2c8c6bfbc6435bcf61ccb6b4b1c054f7.setIcon(div_icon_5ddcd10e4fbb9a3e116222c2a13b7a91);
+                marker_d8a59cfa9abc3aaeb0dd2608477aa32c.setIcon(div_icon_d611ab9f59c2daf21a84447a1f735b97);
             
     
-            var marker_9acfddbda89fd98807f22df1d155e846 = L.marker(
+            var marker_fc4e9f84d40711068a0cb90e54eff57b = L.marker(
                 [47.65510166666667, -122.29668666666667],
                 {
 }
-            ).addTo(feature_group_4a5fdf5233a37f9d653c7cf5d3e3d3a2);
+            ).addTo(feature_group_03ef2caf8d042a02e2ca0ee331f4ed8d);
         
     
-            var div_icon_f77ad6fd562a62a7ad1c339b17d381c5 = L.divIcon({
+            var div_icon_dfe7f71cdd984f9d2dbc668cbe5595aa = L.divIcon({
   "html": "\u003cdiv style=\"font-size:16px; font-weight:bold; color:black; line-height:16px; text-align:center;\"\u003eX\u003c/div\u003e",
   "iconSize": [16, 16],
   "iconAnchor": [8, 8],
@@ -242,7 +310,7 @@
 });
         
     
-            marker_9acfddbda89fd98807f22df1d155e846.bindTooltip(
+            marker_fc4e9f84d40711068a0cb90e54eff57b.bindTooltip(
                 `<div>
                      Patch A — A7
                  </div>`,
@@ -254,17 +322,17 @@
             );
         
     
-                marker_9acfddbda89fd98807f22df1d155e846.setIcon(div_icon_f77ad6fd562a62a7ad1c339b17d381c5);
+                marker_fc4e9f84d40711068a0cb90e54eff57b.setIcon(div_icon_dfe7f71cdd984f9d2dbc668cbe5595aa);
             
     
-            var marker_8f20ac8cd117767deeda3bcd44c3cec5 = L.marker(
+            var marker_aa7db82eaa78927b91e93ffc1259537a = L.marker(
                 [47.65483889, -122.29553889],
                 {
 }
-            ).addTo(feature_group_4a5fdf5233a37f9d653c7cf5d3e3d3a2);
+            ).addTo(feature_group_03ef2caf8d042a02e2ca0ee331f4ed8d);
         
     
-            var div_icon_d0bb670ef439a68712fcf6c7c57f1f3c = L.divIcon({
+            var div_icon_cff6fd94ed1c4d0f58e165a5b4f924f9 = L.divIcon({
   "html": "\u003cdiv style=\"font-size:16px; font-weight:bold; color:black; line-height:16px; text-align:center;\"\u003eX\u003c/div\u003e",
   "iconSize": [16, 16],
   "iconAnchor": [8, 8],
@@ -272,7 +340,7 @@
 });
         
     
-            marker_8f20ac8cd117767deeda3bcd44c3cec5.bindTooltip(
+            marker_aa7db82eaa78927b91e93ffc1259537a.bindTooltip(
                 `<div>
                      Patch E — E2
                  </div>`,
@@ -284,17 +352,17 @@
             );
         
     
-                marker_8f20ac8cd117767deeda3bcd44c3cec5.setIcon(div_icon_d0bb670ef439a68712fcf6c7c57f1f3c);
+                marker_aa7db82eaa78927b91e93ffc1259537a.setIcon(div_icon_cff6fd94ed1c4d0f58e165a5b4f924f9);
             
     
-            var marker_984c04231656f3d929780b0505012a89 = L.marker(
+            var marker_e6d972b2e5b68b614aa11c32eb462d81 = L.marker(
                 [47.65494444, -122.29488333],
                 {
 }
-            ).addTo(feature_group_4a5fdf5233a37f9d653c7cf5d3e3d3a2);
+            ).addTo(feature_group_03ef2caf8d042a02e2ca0ee331f4ed8d);
         
     
-            var div_icon_696126b891dffd62fd5e564fe5aede17 = L.divIcon({
+            var div_icon_46928efc520c8fae999c151b702a9cae = L.divIcon({
   "html": "\u003cdiv style=\"font-size:16px; font-weight:bold; color:black; line-height:16px; text-align:center;\"\u003eX\u003c/div\u003e",
   "iconSize": [16, 16],
   "iconAnchor": [8, 8],
@@ -302,7 +370,7 @@
 });
         
     
-            marker_984c04231656f3d929780b0505012a89.bindTooltip(
+            marker_e6d972b2e5b68b614aa11c32eb462d81.bindTooltip(
                 `<div>
                      Patch E — E4
                  </div>`,
@@ -314,17 +382,17 @@
             );
         
     
-                marker_984c04231656f3d929780b0505012a89.setIcon(div_icon_696126b891dffd62fd5e564fe5aede17);
+                marker_e6d972b2e5b68b614aa11c32eb462d81.setIcon(div_icon_46928efc520c8fae999c151b702a9cae);
             
     
-            var marker_f879b29fbc40607b947bf883bf3bc6b4 = L.marker(
+            var marker_d269e767c0ac7026710c9742a516beae = L.marker(
                 [47.65444167, -122.294875],
                 {
 }
-            ).addTo(feature_group_4a5fdf5233a37f9d653c7cf5d3e3d3a2);
+            ).addTo(feature_group_03ef2caf8d042a02e2ca0ee331f4ed8d);
         
     
-            var div_icon_1ea91edd7927e1b62b0e394043100b80 = L.divIcon({
+            var div_icon_87af53bb949efd9317974ceef2d8f16f = L.divIcon({
   "html": "\u003cdiv style=\"font-size:16px; font-weight:bold; color:black; line-height:16px; text-align:center;\"\u003eX\u003c/div\u003e",
   "iconSize": [16, 16],
   "iconAnchor": [8, 8],
@@ -332,7 +400,7 @@
 });
         
     
-            marker_f879b29fbc40607b947bf883bf3bc6b4.bindTooltip(
+            marker_d269e767c0ac7026710c9742a516beae.bindTooltip(
                 `<div>
                      Patch E — E8
                  </div>`,
@@ -344,17 +412,17 @@
             );
         
     
-                marker_f879b29fbc40607b947bf883bf3bc6b4.setIcon(div_icon_1ea91edd7927e1b62b0e394043100b80);
+                marker_d269e767c0ac7026710c9742a516beae.setIcon(div_icon_87af53bb949efd9317974ceef2d8f16f);
             
     
-            var marker_aa0297b6fdd96bdae4c0192efb3c0473 = L.marker(
+            var marker_b9e2daa1e97c4e7a439fab9ed5befcb6 = L.marker(
                 [47.65428611, -122.29529444],
                 {
 }
-            ).addTo(feature_group_4a5fdf5233a37f9d653c7cf5d3e3d3a2);
+            ).addTo(feature_group_03ef2caf8d042a02e2ca0ee331f4ed8d);
         
     
-            var div_icon_2a431cdc2c7a68647b9a7cd15e688124 = L.divIcon({
+            var div_icon_47335674ea28aa94d0c508ba5825aec7 = L.divIcon({
   "html": "\u003cdiv style=\"font-size:16px; font-weight:bold; color:black; line-height:16px; text-align:center;\"\u003eX\u003c/div\u003e",
   "iconSize": [16, 16],
   "iconAnchor": [8, 8],
@@ -362,7 +430,7 @@
 });
         
     
-            marker_aa0297b6fdd96bdae4c0192efb3c0473.bindTooltip(
+            marker_b9e2daa1e97c4e7a439fab9ed5befcb6.bindTooltip(
                 `<div>
                      Patch E — E9
                  </div>`,
@@ -374,25 +442,25 @@
             );
         
     
-                marker_aa0297b6fdd96bdae4c0192efb3c0473.setIcon(div_icon_2a431cdc2c7a68647b9a7cd15e688124);
+                marker_b9e2daa1e97c4e7a439fab9ed5befcb6.setIcon(div_icon_47335674ea28aa94d0c508ba5825aec7);
             
     
-            feature_group_4a5fdf5233a37f9d653c7cf5d3e3d3a2.addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            feature_group_03ef2caf8d042a02e2ca0ee331f4ed8d.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
         
     
-            var feature_group_0afcf453ace288214cee8a4016f1e71d = L.featureGroup(
+            var feature_group_44722a4399423927a3f4d639844b478f = L.featureGroup(
                 {
 }
             );
         
     
-            var circle_marker_682a5742ef0a2b2e1da519f05cba5e58 = L.circleMarker(
+            var circle_marker_ad0551e35cf2977bb4e32b2b89b5d1c3 = L.circleMarker(
                 [47.655109036291265, -122.29667425192561],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_0afcf453ace288214cee8a4016f1e71d);
+            ).addTo(feature_group_44722a4399423927a3f4d639844b478f);
         
     
-            circle_marker_682a5742ef0a2b2e1da519f05cba5e58.bindTooltip(
+            circle_marker_ad0551e35cf2977bb4e32b2b89b5d1c3.bindTooltip(
                 `<div>
                      Playback test #1, point 1<br>Time: 12:02:57<br>Source files: *_190000_SYNC.WAV<br>Patch: A<br>Reference microphone: A7<br>East: 0.93 m<br>North: 0.82 m
                  </div>`,
@@ -402,13 +470,13 @@
             );
         
     
-            var circle_marker_c8b77f7ba9c000e15bc929f33ec21e77 = L.circleMarker(
+            var circle_marker_c92920ecb5858d58223c4f5dbf6a97b9 = L.circleMarker(
                 [47.655108610074244, -122.29667865172175],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_0afcf453ace288214cee8a4016f1e71d);
+            ).addTo(feature_group_44722a4399423927a3f4d639844b478f);
         
     
-            circle_marker_c8b77f7ba9c000e15bc929f33ec21e77.bindTooltip(
+            circle_marker_c92920ecb5858d58223c4f5dbf6a97b9.bindTooltip(
                 `<div>
                      Playback test #1, point 2<br>Time: 12:03:27<br>Source files: *_190000_SYNC.WAV<br>Patch: A<br>Reference microphone: A7<br>East: 0.60 m<br>North: 0.77 m
                  </div>`,
@@ -418,13 +486,13 @@
             );
         
     
-            var circle_marker_80cf7a78ce467741e0075c1dabd7f21e = L.circleMarker(
+            var circle_marker_996ee9b08affef6405b8e82bc9b90dcd = L.circleMarker(
                 [47.65510884395027, -122.29667800044822],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_0afcf453ace288214cee8a4016f1e71d);
+            ).addTo(feature_group_44722a4399423927a3f4d639844b478f);
         
     
-            circle_marker_80cf7a78ce467741e0075c1dabd7f21e.bindTooltip(
+            circle_marker_996ee9b08affef6405b8e82bc9b90dcd.bindTooltip(
                 `<div>
                      Playback test #1, point 3<br>Time: 12:03:57<br>Source files: *_190000_SYNC.WAV<br>Patch: A<br>Reference microphone: A7<br>East: 0.65 m<br>North: 0.80 m
                  </div>`,
@@ -434,13 +502,13 @@
             );
         
     
-            var circle_marker_59bd4981adeffa13787c09ee1e3c7990 = L.circleMarker(
+            var circle_marker_8774465f2ca2377b9f8998e705333d68 = L.circleMarker(
                 [47.655109266311726, -122.29667188677627],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_0afcf453ace288214cee8a4016f1e71d);
+            ).addTo(feature_group_44722a4399423927a3f4d639844b478f);
         
     
-            circle_marker_59bd4981adeffa13787c09ee1e3c7990.bindTooltip(
+            circle_marker_8774465f2ca2377b9f8998e705333d68.bindTooltip(
                 `<div>
                      Playback test #1, point 4<br>Time: 12:04:27<br>Source files: *_190000_SYNC.WAV<br>Patch: A<br>Reference microphone: A7<br>East: 1.11 m<br>North: 0.85 m
                  </div>`,
@@ -450,13 +518,13 @@
             );
         
     
-            var circle_marker_f6df77bd12b9685dbdb7399067c200a9 = L.circleMarker(
+            var circle_marker_e5733a6270e509cbf47e7c4eb8efeb00 = L.circleMarker(
                 [47.655108395956916, -122.29668171201973],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_0afcf453ace288214cee8a4016f1e71d);
+            ).addTo(feature_group_44722a4399423927a3f4d639844b478f);
         
     
-            circle_marker_f6df77bd12b9685dbdb7399067c200a9.bindTooltip(
+            circle_marker_e5733a6270e509cbf47e7c4eb8efeb00.bindTooltip(
                 `<div>
                      Playback test #1, point 5<br>Time: 12:04:57<br>Source files: *_190000_SYNC.WAV<br>Patch: A<br>Reference microphone: A7<br>East: 0.37 m<br>North: 0.75 m
                  </div>`,
@@ -466,22 +534,22 @@
             );
         
     
-            feature_group_0afcf453ace288214cee8a4016f1e71d.addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            feature_group_44722a4399423927a3f4d639844b478f.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
         
     
-            var feature_group_45263cb7c435b0da2fbf900009c586b8 = L.featureGroup(
+            var feature_group_4d3e582a0dae130da8198d4ee628fa07 = L.featureGroup(
                 {
 }
             );
         
     
-            var circle_marker_5566f1faa84f056a8699491e89185fa0 = L.circleMarker(
+            var circle_marker_6d6eaca626fe434f82fe02c124472890 = L.circleMarker(
                 [47.655108299708104, -122.29667826267881],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "pink", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_45263cb7c435b0da2fbf900009c586b8);
+            ).addTo(feature_group_4d3e582a0dae130da8198d4ee628fa07);
         
     
-            circle_marker_5566f1faa84f056a8699491e89185fa0.bindTooltip(
+            circle_marker_6d6eaca626fe434f82fe02c124472890.bindTooltip(
                 `<div>
                      Playback test #2, point 1<br>Time: 12:08:38<br>Source files: *_190000_SYNC.WAV<br>Patch: A<br>Reference microphone: A7<br>East: 0.63 m<br>North: 0.74 m
                  </div>`,
@@ -491,13 +559,13 @@
             );
         
     
-            var circle_marker_fd8e02db6a4c166633b51a256e6821d4 = L.circleMarker(
+            var circle_marker_3e690e54a28c5a6daf1914d4dd80de6c = L.circleMarker(
                 [47.655108231166345, -122.29668306622393],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "pink", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_45263cb7c435b0da2fbf900009c586b8);
+            ).addTo(feature_group_4d3e582a0dae130da8198d4ee628fa07);
         
     
-            circle_marker_fd8e02db6a4c166633b51a256e6821d4.bindTooltip(
+            circle_marker_3e690e54a28c5a6daf1914d4dd80de6c.bindTooltip(
                 `<div>
                      Playback test #2, point 2<br>Time: 12:09:08<br>Source files: *_190000_SYNC.WAV<br>Patch: A<br>Reference microphone: A7<br>East: 0.27 m<br>North: 0.73 m
                  </div>`,
@@ -507,13 +575,13 @@
             );
         
     
-            var circle_marker_bf3140ca37d8ca06e350088c826fea38 = L.circleMarker(
+            var circle_marker_38f16941dce983718cf94ab71de02e32 = L.circleMarker(
                 [47.655109482199705, -122.29667090368005],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "pink", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_45263cb7c435b0da2fbf900009c586b8);
+            ).addTo(feature_group_4d3e582a0dae130da8198d4ee628fa07);
         
     
-            circle_marker_bf3140ca37d8ca06e350088c826fea38.bindTooltip(
+            circle_marker_38f16941dce983718cf94ab71de02e32.bindTooltip(
                 `<div>
                      Playback test #2, point 3<br>Time: 12:09:38<br>Source files: *_190000_SYNC.WAV<br>Patch: A<br>Reference microphone: A7<br>East: 1.18 m<br>North: 0.87 m
                  </div>`,
@@ -523,13 +591,13 @@
             );
         
     
-            var circle_marker_740e63138dd6c965d1e907ccb3ae89f7 = L.circleMarker(
+            var circle_marker_7200250b4602d8fd8092c72a8d17861c = L.circleMarker(
                 [47.65510890831151, -122.2966769812444],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "pink", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_45263cb7c435b0da2fbf900009c586b8);
+            ).addTo(feature_group_4d3e582a0dae130da8198d4ee628fa07);
         
     
-            circle_marker_740e63138dd6c965d1e907ccb3ae89f7.bindTooltip(
+            circle_marker_7200250b4602d8fd8092c72a8d17861c.bindTooltip(
                 `<div>
                      Playback test #2, point 4<br>Time: 12:10:08<br>Source files: *_190000_SYNC.WAV<br>Patch: A<br>Reference microphone: A7<br>East: 0.73 m<br>North: 0.81 m
                  </div>`,
@@ -539,13 +607,13 @@
             );
         
     
-            var circle_marker_547059c3089820dec21d1f08404a4cd8 = L.circleMarker(
+            var circle_marker_61131f6f0df5d7c9af76795e62e6c2db = L.circleMarker(
                 [47.65510860826988, -122.29667933813626],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "pink", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_45263cb7c435b0da2fbf900009c586b8);
+            ).addTo(feature_group_4d3e582a0dae130da8198d4ee628fa07);
         
     
-            circle_marker_547059c3089820dec21d1f08404a4cd8.bindTooltip(
+            circle_marker_61131f6f0df5d7c9af76795e62e6c2db.bindTooltip(
                 `<div>
                      Playback test #2, point 5<br>Time: 12:10:38<br>Source files: *_190000_SYNC.WAV<br>Patch: A<br>Reference microphone: A7<br>East: 0.55 m<br>North: 0.77 m
                  </div>`,
@@ -555,22 +623,22 @@
             );
         
     
-            feature_group_45263cb7c435b0da2fbf900009c586b8.addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            feature_group_4d3e582a0dae130da8198d4ee628fa07.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
         
     
-            var feature_group_107203f52e318c31e6d59101777ca19a = L.featureGroup(
+            var feature_group_3bbd7406ada8c5d62035b7f27bde473e = L.featureGroup(
                 {
 }
             );
         
     
-            var circle_marker_c92cf0b91d45b33ec8603bb4892a0cd1 = L.circleMarker(
+            var circle_marker_74432f4f56e7fe05543aabdc36d73249 = L.circleMarker(
                 [47.65444225037356, -122.29492112686708],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_107203f52e318c31e6d59101777ca19a);
+            ).addTo(feature_group_3bbd7406ada8c5d62035b7f27bde473e);
         
     
-            circle_marker_c92cf0b91d45b33ec8603bb4892a0cd1.bindTooltip(
+            circle_marker_74432f4f56e7fe05543aabdc36d73249.bindTooltip(
                 `<div>
                      Playback test #3, point 1<br>Time: 13:37:44.2<br>Source files: *_203000_SYNC.WAV<br>Patch: E<br>Reference microphone: E8<br>East: -3.45 m<br>North: 0.06 m
                  </div>`,
@@ -580,13 +648,13 @@
             );
         
     
-            var circle_marker_f724659773bec0e948faffecdebe87c7 = L.circleMarker(
+            var circle_marker_00c623b1a913601291bae8b0c5c15a1d = L.circleMarker(
                 [47.654443107857354, -122.2949231203803],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_107203f52e318c31e6d59101777ca19a);
+            ).addTo(feature_group_3bbd7406ada8c5d62035b7f27bde473e);
         
     
-            circle_marker_f724659773bec0e948faffecdebe87c7.bindTooltip(
+            circle_marker_00c623b1a913601291bae8b0c5c15a1d.bindTooltip(
                 `<div>
                      Playback test #3, point 2<br>Time: 13:38:13.8<br>Source files: *_203000_SYNC.WAV<br>Patch: E<br>Reference microphone: E8<br>East: -3.60 m<br>North: 0.16 m
                  </div>`,
@@ -596,13 +664,13 @@
             );
         
     
-            var circle_marker_99a57a64136032e8778ea7952c6e8a41 = L.circleMarker(
+            var circle_marker_28313f6f1390513ccae335b4614bc621 = L.circleMarker(
                 [47.65444293413212, -122.2949230792249],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_107203f52e318c31e6d59101777ca19a);
+            ).addTo(feature_group_3bbd7406ada8c5d62035b7f27bde473e);
         
     
-            circle_marker_99a57a64136032e8778ea7952c6e8a41.bindTooltip(
+            circle_marker_28313f6f1390513ccae335b4614bc621.bindTooltip(
                 `<div>
                      Playback test #3, point 3<br>Time: 13:38:43.2<br>Source files: *_203000_SYNC.WAV<br>Patch: E<br>Reference microphone: E8<br>East: -3.60 m<br>North: 0.14 m
                  </div>`,
@@ -612,13 +680,13 @@
             );
         
     
-            var circle_marker_525d14a86243ae102b595c84d2297a97 = L.circleMarker(
+            var circle_marker_1cdf5c656b3c9e58c94eb8892f863012 = L.circleMarker(
                 [47.65444313337525, -122.29492260761337],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_107203f52e318c31e6d59101777ca19a);
+            ).addTo(feature_group_3bbd7406ada8c5d62035b7f27bde473e);
         
     
-            circle_marker_525d14a86243ae102b595c84d2297a97.bindTooltip(
+            circle_marker_1cdf5c656b3c9e58c94eb8892f863012.bindTooltip(
                 `<div>
                      Playback test #3, point 4<br>Time: 13:39:13.6<br>Source files: *_203000_SYNC.WAV<br>Patch: E<br>Reference microphone: E8<br>East: -3.57 m<br>North: 0.16 m
                  </div>`,
@@ -628,13 +696,13 @@
             );
         
     
-            var circle_marker_cc2fa82f6ac735d97a1985b697a908f4 = L.circleMarker(
+            var circle_marker_63c6ffee6dc219edbec4aa3c4fa99f43 = L.circleMarker(
                 [47.65444290162236, -122.29492222682703],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "blue", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_107203f52e318c31e6d59101777ca19a);
+            ).addTo(feature_group_3bbd7406ada8c5d62035b7f27bde473e);
         
     
-            circle_marker_cc2fa82f6ac735d97a1985b697a908f4.bindTooltip(
+            circle_marker_63c6ffee6dc219edbec4aa3c4fa99f43.bindTooltip(
                 `<div>
                      Playback test #3, point 5<br>Time: 13:39:43.8<br>Source files: *_203000_SYNC.WAV<br>Patch: E<br>Reference microphone: E8<br>East: -3.54 m<br>North: 0.14 m
                  </div>`,
@@ -644,13 +712,13 @@
             );
         
     
-            var circle_marker_73d92afb766fee2df7a4cc1e5480b8db = L.circleMarker(
+            var circle_marker_d3cfbbeeaeba3ac0faae293d6964e9f0 = L.circleMarker(
                 [47.65444367602653, -122.29492472426153],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_107203f52e318c31e6d59101777ca19a);
+            ).addTo(feature_group_3bbd7406ada8c5d62035b7f27bde473e);
         
     
-            circle_marker_73d92afb766fee2df7a4cc1e5480b8db.bindTooltip(
+            circle_marker_d3cfbbeeaeba3ac0faae293d6964e9f0.bindTooltip(
                 `<div>
                      Playback test #3, point 6<br>Time: 13:40:13.8<br>Source files: *_203000_SYNC.WAV<br>Patch: E<br>Reference microphone: E8<br>East: -3.72 m<br>North: 0.22 m
                  </div>`,
@@ -660,13 +728,13 @@
             );
         
     
-            var circle_marker_53233a7cd4bab3f63219e6771d23e3ef = L.circleMarker(
+            var circle_marker_837eeb5054fcd9a07c8a6e4ab25a4382 = L.circleMarker(
                 [47.654443037608026, -122.29492221695095],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_107203f52e318c31e6d59101777ca19a);
+            ).addTo(feature_group_3bbd7406ada8c5d62035b7f27bde473e);
         
     
-            circle_marker_53233a7cd4bab3f63219e6771d23e3ef.bindTooltip(
+            circle_marker_837eeb5054fcd9a07c8a6e4ab25a4382.bindTooltip(
                 `<div>
                      Playback test #3, point 7<br>Time: 13:40:43.6<br>Source files: *_203000_SYNC.WAV<br>Patch: E<br>Reference microphone: E8<br>East: -3.54 m<br>North: 0.15 m
                  </div>`,
@@ -676,13 +744,13 @@
             );
         
     
-            var circle_marker_dc293ca2e7b4cc9c644f7670c469822f = L.circleMarker(
+            var circle_marker_1ae2bf21b28344509d37fd9dd17b0bb0 = L.circleMarker(
                 [47.65444482787179, -122.29492709656753],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_107203f52e318c31e6d59101777ca19a);
+            ).addTo(feature_group_3bbd7406ada8c5d62035b7f27bde473e);
         
     
-            circle_marker_dc293ca2e7b4cc9c644f7670c469822f.bindTooltip(
+            circle_marker_1ae2bf21b28344509d37fd9dd17b0bb0.bindTooltip(
                 `<div>
                      Playback test #3, point 8<br>Time: 13:41:13.8<br>Source files: *_203000_SYNC.WAV<br>Patch: E<br>Reference microphone: E8<br>East: -3.90 m<br>North: 0.35 m
                  </div>`,
@@ -692,13 +760,13 @@
             );
         
     
-            var circle_marker_04c37860967af0f9e085d9669a12cf0b = L.circleMarker(
+            var circle_marker_01e4219fe6a69c4587f758d48f357b5f = L.circleMarker(
                 [47.65444478655415, -122.29492544771256],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_107203f52e318c31e6d59101777ca19a);
+            ).addTo(feature_group_3bbd7406ada8c5d62035b7f27bde473e);
         
     
-            circle_marker_04c37860967af0f9e085d9669a12cf0b.bindTooltip(
+            circle_marker_01e4219fe6a69c4587f758d48f357b5f.bindTooltip(
                 `<div>
                      Playback test #3, point 9<br>Time: 13:41:43.8<br>Source files: *_203000_SYNC.WAV<br>Patch: E<br>Reference microphone: E8<br>East: -3.78 m<br>North: 0.35 m
                  </div>`,
@@ -708,13 +776,13 @@
             );
         
     
-            var circle_marker_d15aaafabf59c15ba592f378bacaef02 = L.circleMarker(
+            var circle_marker_fd4a14f8aa7809e36ed06fba66689e91 = L.circleMarker(
                 [47.654444078734905, -122.29492207090145],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "cyan", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_107203f52e318c31e6d59101777ca19a);
+            ).addTo(feature_group_3bbd7406ada8c5d62035b7f27bde473e);
         
     
-            circle_marker_d15aaafabf59c15ba592f378bacaef02.bindTooltip(
+            circle_marker_fd4a14f8aa7809e36ed06fba66689e91.bindTooltip(
                 `<div>
                      Playback test #3, point 10<br>Time: 13:42:13.8<br>Source files: *_203000_SYNC.WAV<br>Patch: E<br>Reference microphone: E8<br>East: -3.53 m<br>North: 0.27 m
                  </div>`,
@@ -724,24 +792,40 @@
             );
         
     
-            feature_group_107203f52e318c31e6d59101777ca19a.addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            feature_group_3bbd7406ada8c5d62035b7f27bde473e.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
         
     
-            var feature_group_2f7534634ef07c9d773462d87652e773 = L.featureGroup(
+            var feature_group_542cf4f5a72b194a6d4e27c8a747a844 = L.featureGroup(
                 {
 }
             );
         
     
-            var circle_marker_0c1210be1ecd86d9f3380042727953eb = L.circleMarker(
+            var circle_marker_8ec45d15ea59a6be374b8e586f8de7b6 = L.circleMarker(
+                [47.65485238069485, -122.29559387830055],
+                {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "green", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
+            ).addTo(feature_group_542cf4f5a72b194a6d4e27c8a747a844);
+        
+    
+            circle_marker_8ec45d15ea59a6be374b8e586f8de7b6.bindTooltip(
+                `<div>
+                     Playback test #4, point 1<br>Time: 13:57:54.4<br>Source files: *_203000_SYNC.WAV<br>Patch: E<br>Reference microphone: E2<br>East: -4.12 m<br>North: 1.50 m
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_0548bdacec047604edcf2fbd1a43d80f = L.circleMarker(
                 [47.65487088201718, -122.29562274680667],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lightgreen", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_2f7534634ef07c9d773462d87652e773);
+            ).addTo(feature_group_542cf4f5a72b194a6d4e27c8a747a844);
         
     
-            circle_marker_0c1210be1ecd86d9f3380042727953eb.bindTooltip(
+            circle_marker_0548bdacec047604edcf2fbd1a43d80f.bindTooltip(
                 `<div>
-                     Playback test #4, point 1<br>Time: 13:57:54.4<br>Source files: *_203000_SYNC.WAV<br>Patch: E<br>Reference microphone: E2<br>East: -6.28 m<br>North: 3.56 m
+                     Playback test #4, point 2<br>Time: 14:00:24.2<br>Source files: *_210000_SYNC.WAV<br>Patch: E<br>Reference microphone: E2<br>East: -6.28 m<br>North: 3.56 m
                  </div>`,
                 {
   "sticky": true,
@@ -749,15 +833,15 @@
             );
         
     
-            var circle_marker_1c323a836142cbe367ff68ab533d9f5b = L.circleMarker(
+            var circle_marker_cc3915c5adbf754222a7e1e6b8c42e9a = L.circleMarker(
                 [47.65487122335862, -122.29562797235025],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lightgreen", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_2f7534634ef07c9d773462d87652e773);
+            ).addTo(feature_group_542cf4f5a72b194a6d4e27c8a747a844);
         
     
-            circle_marker_1c323a836142cbe367ff68ab533d9f5b.bindTooltip(
+            circle_marker_cc3915c5adbf754222a7e1e6b8c42e9a.bindTooltip(
                 `<div>
-                     Playback test #4, point 2<br>Time: 14:00:24.2<br>Source files: *_210000_SYNC.WAV<br>Patch: E<br>Reference microphone: E2<br>East: -6.67 m<br>North: 3.60 m
+                     Playback test #4, point 3<br>Time: 14:00:54.2<br>Source files: *_210000_SYNC.WAV<br>Patch: E<br>Reference microphone: E2<br>East: -6.67 m<br>North: 3.60 m
                  </div>`,
                 {
   "sticky": true,
@@ -765,15 +849,15 @@
             );
         
     
-            var circle_marker_28b0c33661e1dce2115642b7b19aaa46 = L.circleMarker(
+            var circle_marker_cc09821bbdc9fa79dc7148b2defd9933 = L.circleMarker(
                 [47.65487114831645, -122.29562967752062],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lightgreen", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_2f7534634ef07c9d773462d87652e773);
+            ).addTo(feature_group_542cf4f5a72b194a6d4e27c8a747a844);
         
     
-            circle_marker_28b0c33661e1dce2115642b7b19aaa46.bindTooltip(
+            circle_marker_cc09821bbdc9fa79dc7148b2defd9933.bindTooltip(
                 `<div>
-                     Playback test #4, point 3<br>Time: 14:00:54.2<br>Source files: *_210000_SYNC.WAV<br>Patch: E<br>Reference microphone: E2<br>East: -6.80 m<br>North: 3.59 m
+                     Playback test #4, point 4<br>Time: 14:01:24.2<br>Source files: *_210000_SYNC.WAV<br>Patch: E<br>Reference microphone: E2<br>East: -6.80 m<br>North: 3.59 m
                  </div>`,
                 {
   "sticky": true,
@@ -781,15 +865,15 @@
             );
         
     
-            var circle_marker_d6fcd97ae71fd4c87a381ce5626e6a56 = L.circleMarker(
+            var circle_marker_80583f9aab085800bc00054f9ed44f5a = L.circleMarker(
                 [47.65487188506913, -122.295631636398],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lightgreen", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_2f7534634ef07c9d773462d87652e773);
+            ).addTo(feature_group_542cf4f5a72b194a6d4e27c8a747a844);
         
     
-            circle_marker_d6fcd97ae71fd4c87a381ce5626e6a56.bindTooltip(
+            circle_marker_80583f9aab085800bc00054f9ed44f5a.bindTooltip(
                 `<div>
-                     Playback test #4, point 4<br>Time: 14:01:24.2<br>Source files: *_210000_SYNC.WAV<br>Patch: E<br>Reference microphone: E2<br>East: -6.95 m<br>North: 3.67 m
+                     Playback test #4, point 5<br>Time: 14:01:54.2<br>Source files: *_210000_SYNC.WAV<br>Patch: E<br>Reference microphone: E2<br>East: -6.95 m<br>North: 3.67 m
                  </div>`,
                 {
   "sticky": true,
@@ -797,15 +881,15 @@
             );
         
     
-            var circle_marker_baab85a1f5c5cb6f4547fbcfdb19fad3 = L.circleMarker(
+            var circle_marker_6542e535192ddcdd0362ff26b8b6f2dc = L.circleMarker(
                 [47.654842563623376, -122.29559856705397],
                 {"bubblingMouseEvents": true, "color": "black", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "lightgreen", "fillOpacity": 1, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5, "stroke": true, "weight": 1}
-            ).addTo(feature_group_2f7534634ef07c9d773462d87652e773);
+            ).addTo(feature_group_542cf4f5a72b194a6d4e27c8a747a844);
         
     
-            circle_marker_baab85a1f5c5cb6f4547fbcfdb19fad3.bindTooltip(
+            circle_marker_6542e535192ddcdd0362ff26b8b6f2dc.bindTooltip(
                 `<div>
-                     Playback test #4, point 5<br>Time: 14:01:54.2<br>Source files: *_210000_SYNC.WAV<br>Patch: E<br>Reference microphone: E2<br>East: -4.47 m<br>North: 0.41 m
+                     Playback test #4, point 6<br>Time: 14:02:24.2<br>Source files: *_210000_SYNC.WAV<br>Patch: E<br>Reference microphone: E2<br>East: -4.47 m<br>North: 0.41 m
                  </div>`,
                 {
   "sticky": true,
@@ -813,10 +897,10 @@
             );
         
     
-            feature_group_2f7534634ef07c9d773462d87652e773.addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            feature_group_542cf4f5a72b194a6d4e27c8a747a844.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
         
     
-            var measure_control_f1cb61fbeafd687d270a89d707e8b4a7 = new L.Control.Measure(
+            var measure_control_24d53dfc6bb3b6e282cd3e39e4121c92 = new L.Control.Measure(
                 {
   "position": "topleft",
   "primaryLengthUnit": "meters",
@@ -824,7 +908,7 @@
   "primaryAreaUnit": "sqmeters",
   "secondaryAreaUnit": "acres",
 });
-            map_5bfd6418180e943c6aa6d0d8c0b5ff45.addControl(measure_control_f1cb61fbeafd687d270a89d707e8b4a7);
+            map_970baae04134c403a9d2e7ec0fb694d5.addControl(measure_control_24d53dfc6bb3b6e282cd3e39e4121c92);
 
             // Workaround for using this plugin with Leaflet>=1.8.0
             // https://github.com/ljagis/leaflet-measure/issues/171
@@ -843,73 +927,118 @@
 
         
     
-            var layer_control_c5d1b1eaf198e5bad4da2599b2a3c562_layers = {
+            var layer_control_30db3dacf8a1217bdcd07cc1a2791645_layers = {
                 base_layers : {
-                    "OpenStreetMap" : tile_layer_802787562bd06777a51c4a2049ad04f6,
+                    "OpenStreetMap" : tile_layer_19ae9304db3dc20c7e3e1310a4272f15,
                 },
                 overlays :  {
-                    "Microphones" : feature_group_4a5fdf5233a37f9d653c7cf5d3e3d3a2,
-                    "Playback test #1 localization" : feature_group_0afcf453ace288214cee8a4016f1e71d,
-                    "Playback test #2 localization" : feature_group_45263cb7c435b0da2fbf900009c586b8,
-                    "Playback test #3 localization" : feature_group_107203f52e318c31e6d59101777ca19a,
-                    "Playback test #4 localization" : feature_group_2f7534634ef07c9d773462d87652e773,
+                    "Microphones" : feature_group_03ef2caf8d042a02e2ca0ee331f4ed8d,
+                    "Playback test #1 localization" : feature_group_44722a4399423927a3f4d639844b478f,
+                    "Playback test #2 localization" : feature_group_4d3e582a0dae130da8198d4ee628fa07,
+                    "Playback test #3 localization" : feature_group_3bbd7406ada8c5d62035b7f27bde473e,
+                    "Playback test #4 localization" : feature_group_542cf4f5a72b194a6d4e27c8a747a844,
                 },
             };
-            let layer_control_c5d1b1eaf198e5bad4da2599b2a3c562 = L.control.layers(
-                layer_control_c5d1b1eaf198e5bad4da2599b2a3c562_layers.base_layers,
-                layer_control_c5d1b1eaf198e5bad4da2599b2a3c562_layers.overlays,
+            let layer_control_30db3dacf8a1217bdcd07cc1a2791645 = L.control.layers(
+                layer_control_30db3dacf8a1217bdcd07cc1a2791645_layers.base_layers,
+                layer_control_30db3dacf8a1217bdcd07cc1a2791645_layers.overlays,
                 {
   "position": "topright",
   "collapsed": true,
   "autoZIndex": true,
 }
-            ).addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            ).addTo(map_970baae04134c403a9d2e7ec0fb694d5);
 
         
     
-            map_5bfd6418180e943c6aa6d0d8c0b5ff45.fitBounds(
-                [[47.655728333333336, -122.29671333333333], [47.655405, -122.29667], [47.65510166666667, -122.29668666666667], [47.65483889, -122.29553889], [47.65494444, -122.29488333], [47.65444167, -122.294875], [47.65428611, -122.29529444], [47.655109036291265, -122.29667425192561], [47.655108610074244, -122.29667865172175], [47.65510884395027, -122.29667800044822], [47.655109266311726, -122.29667188677627], [47.655108395956916, -122.29668171201973], [47.655108299708104, -122.29667826267881], [47.655108231166345, -122.29668306622393], [47.655109482199705, -122.29667090368005], [47.65510890831151, -122.2966769812444], [47.65510860826988, -122.29667933813626], [47.65444225037356, -122.29492112686708], [47.654443107857354, -122.2949231203803], [47.65444293413212, -122.2949230792249], [47.65444313337525, -122.29492260761337], [47.65444290162236, -122.29492222682703], [47.65444367602653, -122.29492472426153], [47.654443037608026, -122.29492221695095], [47.65444482787179, -122.29492709656753], [47.65444478655415, -122.29492544771256], [47.654444078734905, -122.29492207090145], [47.65487088201718, -122.29562274680667], [47.65487122335862, -122.29562797235025], [47.65487114831645, -122.29562967752062], [47.65487188506913, -122.295631636398], [47.654842563623376, -122.29559856705397]],
+            map_970baae04134c403a9d2e7ec0fb694d5.fitBounds(
+                [[47.655728333333336, -122.29671333333333], [47.655405, -122.29667], [47.65510166666667, -122.29668666666667], [47.65483889, -122.29553889], [47.65494444, -122.29488333], [47.65444167, -122.294875], [47.65428611, -122.29529444], [47.655109036291265, -122.29667425192561], [47.655108610074244, -122.29667865172175], [47.65510884395027, -122.29667800044822], [47.655109266311726, -122.29667188677627], [47.655108395956916, -122.29668171201973], [47.655108299708104, -122.29667826267881], [47.655108231166345, -122.29668306622393], [47.655109482199705, -122.29667090368005], [47.65510890831151, -122.2966769812444], [47.65510860826988, -122.29667933813626], [47.65444225037356, -122.29492112686708], [47.654443107857354, -122.2949231203803], [47.65444293413212, -122.2949230792249], [47.65444313337525, -122.29492260761337], [47.65444290162236, -122.29492222682703], [47.65444367602653, -122.29492472426153], [47.654443037608026, -122.29492221695095], [47.65444482787179, -122.29492709656753], [47.65444478655415, -122.29492544771256], [47.654444078734905, -122.29492207090145], [47.65485238069485, -122.29559387830055], [47.65487088201718, -122.29562274680667], [47.65487122335862, -122.29562797235025], [47.65487114831645, -122.29562967752062], [47.65487188506913, -122.295631636398], [47.654842563623376, -122.29559856705397]],
                 {"padding": [30, 30]}
             );
         
     
-            tile_layer_802787562bd06777a51c4a2049ad04f6.addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            tile_layer_19ae9304db3dc20c7e3e1310a4272f15.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
         
     
-                marker_0cf55b06e6f7f8c915e6800d8d5d0569.setIcon(div_icon_1dce2a6a48c28930ef370ec77059b26c);
+                marker_8cd35e524c9b2166f854b08243c6667d.setIcon(div_icon_43d2eee321b1405e41f42a3465dded9c);
             
     
-                marker_2c8c6bfbc6435bcf61ccb6b4b1c054f7.setIcon(div_icon_5ddcd10e4fbb9a3e116222c2a13b7a91);
+                marker_d8a59cfa9abc3aaeb0dd2608477aa32c.setIcon(div_icon_d611ab9f59c2daf21a84447a1f735b97);
             
     
-                marker_9acfddbda89fd98807f22df1d155e846.setIcon(div_icon_f77ad6fd562a62a7ad1c339b17d381c5);
+                marker_fc4e9f84d40711068a0cb90e54eff57b.setIcon(div_icon_dfe7f71cdd984f9d2dbc668cbe5595aa);
             
     
-                marker_8f20ac8cd117767deeda3bcd44c3cec5.setIcon(div_icon_d0bb670ef439a68712fcf6c7c57f1f3c);
+                marker_aa7db82eaa78927b91e93ffc1259537a.setIcon(div_icon_cff6fd94ed1c4d0f58e165a5b4f924f9);
             
     
-                marker_984c04231656f3d929780b0505012a89.setIcon(div_icon_696126b891dffd62fd5e564fe5aede17);
+                marker_e6d972b2e5b68b614aa11c32eb462d81.setIcon(div_icon_46928efc520c8fae999c151b702a9cae);
             
     
-                marker_f879b29fbc40607b947bf883bf3bc6b4.setIcon(div_icon_1ea91edd7927e1b62b0e394043100b80);
+                marker_d269e767c0ac7026710c9742a516beae.setIcon(div_icon_87af53bb949efd9317974ceef2d8f16f);
             
     
-                marker_aa0297b6fdd96bdae4c0192efb3c0473.setIcon(div_icon_2a431cdc2c7a68647b9a7cd15e688124);
+                marker_b9e2daa1e97c4e7a439fab9ed5befcb6.setIcon(div_icon_47335674ea28aa94d0c508ba5825aec7);
             
     
-            feature_group_4a5fdf5233a37f9d653c7cf5d3e3d3a2.addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            feature_group_03ef2caf8d042a02e2ca0ee331f4ed8d.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
         
     
-            feature_group_0afcf453ace288214cee8a4016f1e71d.addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            feature_group_44722a4399423927a3f4d639844b478f.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
         
     
-            feature_group_45263cb7c435b0da2fbf900009c586b8.addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            feature_group_4d3e582a0dae130da8198d4ee628fa07.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
         
     
-            feature_group_107203f52e318c31e6d59101777ca19a.addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            feature_group_3bbd7406ada8c5d62035b7f27bde473e.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
         
     
-            feature_group_2f7534634ef07c9d773462d87652e773.addTo(map_5bfd6418180e943c6aa6d0d8c0b5ff45);
+            feature_group_542cf4f5a72b194a6d4e27c8a747a844.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
+        
+    
+            map_970baae04134c403a9d2e7ec0fb694d5.fitBounds(
+                [[47.655728333333336, -122.29671333333333], [47.655405, -122.29667], [47.65510166666667, -122.29668666666667], [47.65483889, -122.29553889], [47.65494444, -122.29488333], [47.65444167, -122.294875], [47.65428611, -122.29529444], [47.655109036291265, -122.29667425192561], [47.655108610074244, -122.29667865172175], [47.65510884395027, -122.29667800044822], [47.655109266311726, -122.29667188677627], [47.655108395956916, -122.29668171201973], [47.655108299708104, -122.29667826267881], [47.655108231166345, -122.29668306622393], [47.655109482199705, -122.29667090368005], [47.65510890831151, -122.2966769812444], [47.65510860826988, -122.29667933813626], [47.65444225037356, -122.29492112686708], [47.654443107857354, -122.2949231203803], [47.65444293413212, -122.2949230792249], [47.65444313337525, -122.29492260761337], [47.65444290162236, -122.29492222682703], [47.65444367602653, -122.29492472426153], [47.654443037608026, -122.29492221695095], [47.65444482787179, -122.29492709656753], [47.65444478655415, -122.29492544771256], [47.654444078734905, -122.29492207090145], [47.65485238069485, -122.29559387830055], [47.65487088201718, -122.29562274680667], [47.65487122335862, -122.29562797235025], [47.65487114831645, -122.29562967752062], [47.65487188506913, -122.295631636398], [47.654842563623376, -122.29559856705397]],
+                {"padding": [30, 30]}
+            );
+        
+    
+            tile_layer_19ae9304db3dc20c7e3e1310a4272f15.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
+        
+    
+                marker_8cd35e524c9b2166f854b08243c6667d.setIcon(div_icon_43d2eee321b1405e41f42a3465dded9c);
+            
+    
+                marker_d8a59cfa9abc3aaeb0dd2608477aa32c.setIcon(div_icon_d611ab9f59c2daf21a84447a1f735b97);
+            
+    
+                marker_fc4e9f84d40711068a0cb90e54eff57b.setIcon(div_icon_dfe7f71cdd984f9d2dbc668cbe5595aa);
+            
+    
+                marker_aa7db82eaa78927b91e93ffc1259537a.setIcon(div_icon_cff6fd94ed1c4d0f58e165a5b4f924f9);
+            
+    
+                marker_e6d972b2e5b68b614aa11c32eb462d81.setIcon(div_icon_46928efc520c8fae999c151b702a9cae);
+            
+    
+                marker_d269e767c0ac7026710c9742a516beae.setIcon(div_icon_87af53bb949efd9317974ceef2d8f16f);
+            
+    
+                marker_b9e2daa1e97c4e7a439fab9ed5befcb6.setIcon(div_icon_47335674ea28aa94d0c508ba5825aec7);
+            
+    
+            feature_group_03ef2caf8d042a02e2ca0ee331f4ed8d.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
+        
+    
+            feature_group_44722a4399423927a3f4d639844b478f.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
+        
+    
+            feature_group_4d3e582a0dae130da8198d4ee628fa07.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
+        
+    
+            feature_group_3bbd7406ada8c5d62035b7f27bde473e.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
+        
+    
+            feature_group_542cf4f5a72b194a6d4e27c8a747a844.addTo(map_970baae04134c403a9d2e7ec0fb694d5);
         
 </script>
 </html>
