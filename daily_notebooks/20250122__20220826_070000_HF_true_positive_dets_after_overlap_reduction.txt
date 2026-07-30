@@ -1,1 +1,0 @@
-Manually-Verified Phonic Group	peak_frequency_time_SPECTROGRAM	peak_frequency_SPECTROGRAM	peak_frequency_WELCH	SNR	Begin Time (s)	End Time (s)	Low Freq (Hz)	High Freq (Hz)	class	class_prob	det_prob	individual	Annotation	sampling_rate	input_file	_merge	Selection	View	Channel
