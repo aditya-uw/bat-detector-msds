@@ -642,7 +642,7 @@ def get_file_paths(data_params):
     """
 
     file_paths = dict()
-    file_paths["raw_SITE_folder"] = f'{Path.cwd()}/output_dir/recover-202606*/{data_params["site_name"]}'
+    file_paths["raw_SITE_folder"] = f'{Path.cwd()}/output_dir/recover-202607*/{data_params["site_name"]}'
     file_paths["detector"] = data_params['detector_tag']
     return file_paths
 
