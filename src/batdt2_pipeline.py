@@ -812,7 +812,7 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
 
     return activity_df
 
-def plot_cumulative_activity(activity_df, data_params, group, save=True):
+def plot_cumulative_activity(activity_df, data_params, group, save=True, plot_in_line=False):
     """
     Plots the cumulative appended DataFrame grid of all detected activity a given site.
 
@@ -890,7 +890,10 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
         (Path(cum_plots_dir)/data_params["METRIC"]).mkdir(parents=True, exist_ok=True)
         plt.savefig(f'{cum_plots_dir}/{data_params["METRIC"]}/{data_params["selection_of_dates"][8:12]}/cumulative_{data_params["selection_of_dates"][8:12]}{data_params["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
                     bbox_inches='tight')
-    plt.close()
+    if plot_in_line:
+        plt.show()
+    else:
+        plt.close()
 
 def delete_segments(necessary_paths):
     """
