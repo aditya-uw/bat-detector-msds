@@ -640,6 +640,7 @@ def construct_activity_arr(cfg, data_params, save=True):
     """
 
     csv_tag = cfg["csv_filename"].split('__')[-1]
+    file_tag = f'DETTHRESH0p{int(100*data_params["detection_threshold_for_activity"])}_SNR{data_params["SNR_threshold_for_activity"]}dB'
     ref_datetimes = pd.to_datetime(data_params['ref_audio_files'], format="%Y%m%d_%H%M%S", exact=False)
     activity_datetimes_for_file = ref_datetimes.tz_localize('UTC')
     good_datetimes = pd.to_datetime(data_params['good_audio_files'], format="%Y%m%d_%H%M%S", exact=False)
@@ -680,9 +681,9 @@ def construct_activity_arr(cfg, data_params, save=True):
         activity_ai_arr = pd.concat([activity_ai_arr, actvt_group_ai_arr], axis=1)
 
     if save:
-        activity_callrate_arr.to_csv(f"{data_params['output_dir']}/CALLRATE__{csv_tag}.csv")
-        activity_btp_arr.to_csv(f"{data_params['output_dir']}/BOUTTIMEPERCENTAGE__{csv_tag}.csv")
-        activity_ai_arr.to_csv(f"{data_params['output_dir']}/ACTIVITYINDEX__{csv_tag}.csv")
+        activity_callrate_arr.to_csv(f"{data_params['output_dir']}/CALLRATE__{csv_tag}_{file_tag}.csv")
+        activity_btp_arr.to_csv(f"{data_params['output_dir']}/BOUTTIMEPERCENTAGE__{csv_tag}_{file_tag}.csv")
+        activity_ai_arr.to_csv(f"{data_params['output_dir']}/ACTIVITYINDEX__{csv_tag}_{file_tag}.csv")
 
     return activity_callrate_arr
 
@@ -808,7 +809,11 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots/'
     if save:
         (Path(cum_plots_dir)/cfg["METRIC"]).mkdir(parents=True, exist_ok=True)
-        activity_df.to_csv(f'{cum_plots_dir}/{cfg["METRIC"]}/{data_params["selection_of_dates"][8:12]}/cumulative_{data_params["selection_of_dates"][8:12]}{cfg["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.csv')
+        save_folder = f'{cum_plots_dir}/{cfg["METRIC"]}/{data_params["selection_of_dates"][8:12]}'
+        file_tag1 = f'{data_params["selection_of_dates"][8:12]}{cfg["METRIC"]}'
+        file_tag2 = f'{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}'
+        file_tag3 = f'DETTHRESH0p{int(100*data_params["detection_threshold_for_activity"])}_SNR{data_params["SNR_threshold_for_activity"]}dB'
+        activity_df.to_csv(f'{save_folder}/cumulative_{file_tag1}__{file_tag2}__{file_tag3}.csv')
 
     return activity_df
 
@@ -888,8 +893,11 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
     cum_plots_dir = f'{Path(__file__).parent}/../output_dir/cumulative_plots'
     if save:
         (Path(cum_plots_dir)/data_params["METRIC"]).mkdir(parents=True, exist_ok=True)
-        plt.savefig(f'{cum_plots_dir}/{data_params["METRIC"]}/{data_params["selection_of_dates"][8:12]}/cumulative_{data_params["selection_of_dates"][8:12]}{data_params["METRIC"]}__{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}.png', 
-                    bbox_inches='tight')
+        save_folder = f'{cum_plots_dir}/{data_params["METRIC"]}/{data_params["selection_of_dates"][8:12]}'
+        file_tag1 = f'{data_params["selection_of_dates"][8:12]}{data_params["METRIC"]}'
+        file_tag2 = f'{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}'
+        file_tag3 = f'DETTHRESH0p{int(100*data_params["detection_threshold_for_activity"])}_SNR{data_params["SNR_threshold_for_activity"]}dB'
+        plt.savefig(f'{save_folder}/cumulative_{file_tag1}__{file_tag2}__{file_tag3}.png', bbox_inches='tight')
     plt.close()
 
 def delete_segments(necessary_paths):
@@ -1060,24 +1068,25 @@ def run_pipeline_for_session_with_df(cfg):
         data_params['resample_in_min'] = 30
         data_params['resample_tag'] = f"{data_params['resample_in_min']}min"
         data_params['detection_threshold_for_activity'] = 0.35
-        data_params['SNR_threshold_for_activity'] = 3
-        construct_activity_arr(cfg, data_params)
-        for group in ['', 'LF', 'HF']:
-            for cfg['METRIC'] in ['CALLRATE', 'BOUTTIMEPERCENTAGE', 'ACTIVITYINDEX']:
-                cfg['METRIC_TAG'] = METRIC_TAGS[cfg['METRIC']]
-                cfg['COL_TAG'] = COLNAME_TAGS[cfg['METRIC']]
-                cfg['UPPER_LIM'] = PLOT_UPPER_LIM[cfg['METRIC']]
-                activity_df = shape_activity_array_into_grid(cfg, data_params, group)
-                plot_activity_grid(activity_df, data_params, group, save=True)
-                if data_params["site"] != "(Site not found in Field Records)":
-                    year = '2026'
-                    data_params['selection_of_dates'] = f'recover-{year}*'
-                    cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
-                    data_params['show_PST'] = False
-                    data_params['UPPER_LIM'] = cfg['UPPER_LIM']
-                    data_params['METRIC_TAG'] = cfg['METRIC_TAG']
-                    data_params['METRIC'] = cfg['METRIC']
-                    plot_cumulative_activity(cumulative_activity_df, data_params, group)
+        for snr in [3, 7]:
+            data_params['SNR_threshold_for_activity'] = snr
+            construct_activity_arr(cfg, data_params)
+            for group in ['', 'LF', 'HF']:
+                for cfg['METRIC'] in ['CALLRATE', 'BOUTTIMEPERCENTAGE', 'ACTIVITYINDEX']:
+                    cfg['METRIC_TAG'] = METRIC_TAGS[cfg['METRIC']]
+                    cfg['COL_TAG'] = COLNAME_TAGS[cfg['METRIC']]
+                    cfg['UPPER_LIM'] = PLOT_UPPER_LIM[cfg['METRIC']]
+                    activity_df = shape_activity_array_into_grid(cfg, data_params, group)
+                    plot_activity_grid(activity_df, data_params, group, save=True)
+                    if data_params["site"] != "(Site not found in Field Records)":
+                        year = '2026'
+                        data_params['selection_of_dates'] = f'recover-{year}*'
+                        cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
+                        data_params['show_PST'] = False
+                        data_params['UPPER_LIM'] = cfg['UPPER_LIM']
+                        data_params['METRIC_TAG'] = cfg['METRIC_TAG']
+                        data_params['METRIC'] = cfg['METRIC']
+                        plot_cumulative_activity(cumulative_activity_df, data_params, group)
 
     return bd_preds
 
