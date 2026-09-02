@@ -587,10 +587,16 @@ def get_callrate_per_file_from_freq_group_df(freq_group_df, cfg):
     return callrate_per_file
 
 def get_btp_per_file_from_freq_group_df(valid_df, data_params, cfg):
+    empty_btp = pd.Series(dtype=float, index=pd.DatetimeIndex([], name="ref_time"))
+    if valid_df.empty:
+        return empty_btp
+
     all_site_bd2_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/{data_params['cur_selection_of_dates']}*/{data_params['site']}/bd2__*.csv").compute()
     bout_params = get_bout_params_from_location(all_site_bd2_df, data_params)
     batdetect2_preds_with_bouttags = bt.classify_bouts_in_detector_preds_for_freqgroups(valid_df, bout_params)
     bout_metrics = bt.construct_bout_metrics_from_location_df_for_freqgroups(batdetect2_preds_with_bouttags)
+    if bout_metrics.empty:
+            return empty_btp
     bout_metrics['ref_time'] = pd.DatetimeIndex(bout_metrics['start_time_of_bout'])
     bout_metrics['total_bout_duration_in_secs'] = bout_metrics['bout_duration_in_secs']
     bout_metrics = bout_metrics.set_index('ref_time')
@@ -691,8 +697,9 @@ def construct_activity_arr(cfg, data_params, save=True):
 def shape_activity_array_into_grid(cfg, data_params, group):
 
     csv_tag = cfg['csv_filename'].split('__')[-1]
+    file_tag = f'DETTHRESH0p{int(100*data_params["detection_threshold_for_activity"])}_SNR{data_params["SNR_threshold_for_activity"]}dB'
 
-    activity_arr = pd.read_csv(f"{data_params['output_dir']}/{cfg['METRIC']}__{csv_tag}.csv", index_col=0)
+    activity_arr = pd.read_csv(f"{data_params['output_dir']}/{cfg['METRIC']}__{csv_tag}_{file_tag}.csv", index_col=0)
     activity_arr.index = pd.DatetimeIndex(activity_arr.index)
 
     resampled_df = activity_arr.resample(data_params["resample_tag"]).mean().between_time(cfg['recording_start'], cfg['recording_end'], inclusive='left')
@@ -706,12 +713,12 @@ def shape_activity_array_into_grid(cfg, data_params, group):
     activity = pd.DataFrame(data, columns=["Date (UTC)", "Time (UTC)", col_name])
     activity_df = activity.pivot(index="Time (UTC)", columns="Date (UTC)", values=col_name)
     activity_df.columns = pd.to_datetime(activity_df.columns).strftime('%m/%d/%y')
-    activity_df.to_csv(f"{data_params['output_dir']}/{cfg['METRIC']}_plot__{group}{csv_tag}.csv")
+    activity_df.to_csv(f"{data_params['output_dir']}/{cfg['METRIC']}_plot__{group}{csv_tag}_{file_tag}.csv")
 
     return activity_df
 
 
-def plot_activity_grid(plot_df, data_params, group, show_PST=False, save=True):
+def plot_activity_grid(plot_df, cfg, data_params, group, show_PST=False, save=True):
     """
     Plots the above-returned plot_df DataFrame that represents activity over a deployment session.
 
@@ -758,8 +765,9 @@ def plot_activity_grid(plot_df, data_params, group, show_PST=False, save=True):
         plt.ylabel('PST Time (HH:MM)')
     plt.xlabel('Date (MM/DD/YY)')
     plt.colorbar()
+    file_tag = f'DETTHRESH0p{int(100*data_params["detection_threshold_for_activity"])}_SNR{data_params["SNR_threshold_for_activity"]}dB'
     if save:
-        plt.savefig(f"{data_params['output_dir']}/{cfg['METRIC']}_plot__{group}{data_params['recover_folder']}_{data_params['audiomoth_folder']}.png", bbox_inches='tight', pad_inches=0.5)
+        plt.savefig(f"{data_params['output_dir']}/{cfg['METRIC']}_plot__{group}{data_params['recover_folder']}_{data_params['audiomoth_folder']}_{file_tag}.png", bbox_inches='tight', pad_inches=0.5)
     plt.tight_layout()
     plt.close()
 
@@ -787,7 +795,8 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
             - Recordings where the Audiomoth experienced errors are colored red.
     """
 
-    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/{data_params['selection_of_dates']}/{data_params['site']}/{cfg['METRIC']}__*.csv", assume_missing=True).compute()
+    file_tag = f'DETTHRESH0p{int(100*data_params["detection_threshold_for_activity"])}_SNR{data_params["SNR_threshold_for_activity"]}dB'
+    new_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/{data_params['selection_of_dates']}/{data_params['site']}/{cfg['METRIC']}__*_{file_tag}.csv", assume_missing=True).compute()
     new_df["date_and_time_UTC"] = pd.to_datetime(new_df["date_and_time_UTC"], format="%Y-%m-%d %H:%M:%S%z")
     new_df = new_df.set_index('date_and_time_UTC')
     new_df = new_df[~new_df.index.duplicated(keep='first')]
@@ -1090,7 +1099,7 @@ def run_pipeline_for_session_with_df(cfg):
 
     return bd_preds
 
-def get_params_relevant_to_data(cfg):
+def get_params_relevant_to_data(cfg, data_drive_num=8):
     data_params = dict()
     data_params['recover_folder'] = cfg['recover_folder']
     data_params['current_year_recovery'] = data_params['recover_folder'][8:12]
@@ -1101,7 +1110,7 @@ def get_params_relevant_to_data(cfg):
     data_params["audiomoth_folder"] = f"UBNA_{cfg['sd_unit']}"
     print(f"Searching for files from {cfg['recover_folder']} and {data_params['audiomoth_folder']}")
 
-    cur_data_records = dd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_08_collected_audio_records.csv', dtype=str).compute()
+    cur_data_records = dd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_0{data_drive_num}_collected_audio_records.csv', dtype=str).compute()
     if 'Unnamed: 0' in cur_data_records.columns:
         cur_data_records.drop(columns='Unnamed: 0', inplace=True)
     cur_data_records["datetime_UTC"] = pd.DatetimeIndex(cur_data_records["datetime_UTC"])
