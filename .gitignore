@@ -146,3 +146,6 @@ nohup.out
 ubna_data_*.csv
 bd2__recover-20260504_UBNA_028.csv
 bd2__recover-20260601_UBNA_032.csv
+
+daily_notebooks/example_bd2_on_file_personal.ipynb
+daily_notebooks/example_bd2_on_file_personal2.ipynb

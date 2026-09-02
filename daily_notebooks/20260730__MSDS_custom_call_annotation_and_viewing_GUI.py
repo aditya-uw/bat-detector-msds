@@ -71,7 +71,7 @@ def plot_spectrogram(ax, row, audio_seg, location_df_orig, test_df, fs, duration
 
     ax.text(
         x=0.001, y=80000,
-        s=f'Det {row_index+1} of {int(len(test_df))} added dets\nDetection score:{row["det_prob"]}', 
+        s=f'Det {row_index+1} of {int(len(test_df))} added dets\nDetection score:{row["det_prob"]}\nSNR:{row["SNR"]}', 
         fontweight='bold', color='white', fontsize=10)
     
     ax.text(
@@ -642,14 +642,14 @@ def get_file_paths(data_params):
     """
 
     file_paths = dict()
-    file_paths["raw_SITE_folder"] = f'{Path.cwd()}/output_dir/recover-202607*/{data_params["site_name"]}'
+    file_paths["raw_SITE_folder"] = f'{Path.cwd()}/output_dir/recover-20260318/{data_params["site_name"]}'
     file_paths["detector"] = data_params['detector_tag']
     return file_paths
 
 if __name__ == "__main__":
     data_params = dict()
     data_params["site_tag"] = 'Carp'
-    data_params['type_tag'] = ''
+    data_params['type_tag'] = 'HF'
     data_params["site_name"] = SITE_NAMES[data_params["site_tag"]]
     data_params["detection_threshold"] = 0.5
     data_params["detector_tag"] = 'bd2'
