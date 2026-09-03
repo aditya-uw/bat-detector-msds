@@ -1086,7 +1086,7 @@ def run_pipeline_for_session_with_df(cfg):
                     cfg['COL_TAG'] = COLNAME_TAGS[cfg['METRIC']]
                     cfg['UPPER_LIM'] = PLOT_UPPER_LIM[cfg['METRIC']]
                     activity_df = shape_activity_array_into_grid(cfg, data_params, group)
-                    plot_activity_grid(activity_df, data_params, group, save=True)
+                    plot_activity_grid(activity_df, cfg, data_params, group, save=True)
                     if data_params["site"] != "(Site not found in Field Records)":
                         year = '2026'
                         data_params['selection_of_dates'] = f'recover-{year}*'
