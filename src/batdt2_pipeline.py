@@ -1075,27 +1075,28 @@ def run_pipeline_for_session_with_df(cfg):
 
     if (cfg['generate_fig']):
         data_params['resample_in_min'] = 30
-        data_params['resample_tag'] = f"{data_params['resample_in_min']}min"
-        data_params['detection_threshold_for_activity'] = 0.35
-        for snr in [3, 7]:
-            data_params['SNR_threshold_for_activity'] = snr
-            construct_activity_arr(cfg, data_params)
-            for group in ['', 'LF', 'HF']:
-                for cfg['METRIC'] in ['CALLRATE', 'BOUTTIMEPERCENTAGE', 'ACTIVITYINDEX']:
-                    cfg['METRIC_TAG'] = METRIC_TAGS[cfg['METRIC']]
-                    cfg['COL_TAG'] = COLNAME_TAGS[cfg['METRIC']]
-                    cfg['UPPER_LIM'] = PLOT_UPPER_LIM[cfg['METRIC']]
-                    activity_df = shape_activity_array_into_grid(cfg, data_params, group)
-                    plot_activity_grid(activity_df, cfg, data_params, group, save=True)
-                    if data_params["site"] != "(Site not found in Field Records)":
-                        year = '2026'
-                        data_params['selection_of_dates'] = f'recover-{year}*'
-                        cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
-                        data_params['show_PST'] = False
-                        data_params['UPPER_LIM'] = cfg['UPPER_LIM']
-                        data_params['METRIC_TAG'] = cfg['METRIC_TAG']
-                        data_params['METRIC'] = cfg['METRIC']
-                        plot_cumulative_activity(cumulative_activity_df, data_params, group)
+        data_params['resample_tag'] = f"{data_params['resample_in_min']}T"
+        for detthresh in [0.35, 0.5]:
+            data_params['detection_threshold_for_activity'] = detthresh
+            for snr in [3, 7]:
+                data_params['SNR_threshold_for_activity'] = snr
+                construct_activity_arr(cfg, data_params)
+                for group in ['', 'LF', 'HF']:
+                    for cfg['METRIC'] in ['CALLRATE', 'BOUTTIMEPERCENTAGE', 'ACTIVITYINDEX']:
+                        cfg['METRIC_TAG'] = METRIC_TAGS[cfg['METRIC']]
+                        cfg['COL_TAG'] = COLNAME_TAGS[cfg['METRIC']]
+                        cfg['UPPER_LIM'] = PLOT_UPPER_LIM[cfg['METRIC']]
+                        activity_df = shape_activity_array_into_grid(cfg, data_params, group)
+                        plot_activity_grid(activity_df, cfg, data_params, group, save=True)
+                        if data_params["site"] != "(Site not found in Field Records)":
+                            year = '2026'
+                            data_params['selection_of_dates'] = f'recover-{year}*'
+                            cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
+                            data_params['show_PST'] = False
+                            data_params['UPPER_LIM'] = cfg['UPPER_LIM']
+                            data_params['METRIC_TAG'] = cfg['METRIC_TAG']
+                            data_params['METRIC'] = cfg['METRIC']
+                            plot_cumulative_activity(cumulative_activity_df, data_params, group)
 
     return bd_preds
 
