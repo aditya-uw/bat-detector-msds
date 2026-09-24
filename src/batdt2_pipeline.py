@@ -83,6 +83,12 @@ PLOT_UPPER_LIM = {'CALLRATE':1e3,
                'BOUTTIMEPERCENTAGE':1e2,
                'ACTIVITYINDEX':1e2}
 
+def get_sd_card_folder(sd_unit):
+    """Add the default prefix to numeric card IDs; preserve existing prefixes."""
+    sd_unit = str(sd_unit)
+    return f"UBNA_{sd_unit}" if sd_unit.isdigit() else sd_unit
+
+
 def generate_segments_parallel(package_to_chunk):
     """
     Segments audio file into clips of duration length and saves them to output/tmp folder.
@@ -966,7 +972,7 @@ def run_pipeline_for_individual_files_with_df(cfg):
                 print(f"Generating detections for {file.name}")
                 recover_folder = good_location_df.loc[good_location_df['file_path'] == str(file), 'recover_folder'].values[0]
                 audiomoth_folder = good_location_df.loc[good_location_df['file_path'] == str(file), "sd_card_num"].values[0]
-                print(f"This file exists under {recover_folder}/UBNA_{audiomoth_folder}")
+                print(f"This file exists under {recover_folder}/{get_sd_card_folder(audiomoth_folder)}")
                 segmented_file_paths = generate_segmented_paths([file], cfg)
                 file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
                 if (cfg["num_processes"] <= 1):
@@ -1109,7 +1115,7 @@ def get_params_relevant_to_data(cfg, data_drive_num=8):
         data_params['cur_selection_of_dates'] = f'recover-{data_params["current_year_recovery"]}_detections/recover-{data_params["current_year_recovery"]}'
     else:
         data_params['cur_selection_of_dates'] = f'recover-{data_params["current_year_recovery"]}'
-    data_params["audiomoth_folder"] = f"UBNA_{cfg['sd_unit']}"
+    data_params["audiomoth_folder"] = get_sd_card_folder(cfg['sd_unit'])
     print(f"Searching for files from {cfg['recover_folder']} and {data_params['audiomoth_folder']}")
 
     cur_data_records = dd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_0{data_drive_num}_collected_audio_records.csv', dtype=str).compute()
@@ -1128,7 +1134,7 @@ def get_params_relevant_to_data(cfg, data_drive_num=8):
         data_params['output_dir'] = cfg["output_dir"] / cfg['site']
         data_params['site'] = cfg['site']
     else:
-        data_params['output_dir'] = cfg["output_dir"] / f"UBNA_{cfg['sd_unit']}"
+        data_params['output_dir'] = cfg["output_dir"] / data_params["audiomoth_folder"]
     print(f"Will save csv file to {data_params['output_dir']}")
 
     data_params['ref_audio_files'] = sorted(list(files_from_deployment_session["file_path"].apply(lambda x : Path(x)).values))
