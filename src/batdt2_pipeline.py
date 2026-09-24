@@ -83,6 +83,12 @@ PLOT_UPPER_LIM = {'CALLRATE':1e3,
                'BOUTTIMEPERCENTAGE':1e2,
                'ACTIVITYINDEX':1e2}
 
+def get_sd_card_folder(sd_unit):
+    """Add the default prefix to numeric card IDs; preserve existing prefixes."""
+    sd_unit = str(sd_unit)
+    return f"UBNA_{sd_unit}" if sd_unit.isdigit() else sd_unit
+
+
 def generate_segments_parallel(package_to_chunk):
     """
     Segments audio file into clips of duration length and saves them to output/tmp folder.
@@ -590,7 +596,6 @@ def get_btp_per_file_from_freq_group_df(valid_df, data_params, cfg):
     empty_btp = pd.Series(dtype=float, index=pd.DatetimeIndex([], name="ref_time"))
     if valid_df.empty:
         return empty_btp
-
     all_site_bd2_df = dd.read_csv(f"{Path(__file__).parent}/../output_dir/{data_params['cur_selection_of_dates']}*/{data_params['site']}/bd2__*.csv").compute()
     bout_params = get_bout_params_from_location(all_site_bd2_df, data_params)
     batdetect2_preds_with_bouttags = bt.classify_bouts_in_detector_preds_for_freqgroups(valid_df, bout_params)
@@ -826,7 +831,7 @@ def construct_cumulative_activity(data_params, cfg, group, save=True):
 
     return activity_df
 
-def plot_cumulative_activity(activity_df, data_params, group, save=True):
+def plot_cumulative_activity(activity_df, data_params, group, save=True, plot_in_line=False):
     """
     Plots the cumulative appended DataFrame grid of all detected activity a given site.
 
@@ -907,7 +912,10 @@ def plot_cumulative_activity(activity_df, data_params, group, save=True):
         file_tag2 = f'{group}{data_params["site"].split()[0]}_{data_params["resample_tag"]}'
         file_tag3 = f'DETTHRESH0p{int(100*data_params["detection_threshold_for_activity"])}_SNR{data_params["SNR_threshold_for_activity"]}dB'
         plt.savefig(f'{save_folder}/cumulative_{file_tag1}__{file_tag2}__{file_tag3}.png', bbox_inches='tight')
-    plt.close()
+    if plot_in_line:
+        plt.show()
+    else:
+        plt.close()
 
 def delete_segments(necessary_paths):
     """
@@ -964,7 +972,7 @@ def run_pipeline_for_individual_files_with_df(cfg):
                 print(f"Generating detections for {file.name}")
                 recover_folder = good_location_df.loc[good_location_df['file_path'] == str(file), 'recover_folder'].values[0]
                 audiomoth_folder = good_location_df.loc[good_location_df['file_path'] == str(file), "sd_card_num"].values[0]
-                print(f"This file exists under {recover_folder}/UBNA_{audiomoth_folder}")
+                print(f"This file exists under {recover_folder}/{get_sd_card_folder(audiomoth_folder)}")
                 segmented_file_paths = generate_segmented_paths([file], cfg)
                 file_path_mappings = initialize_mappings(segmented_file_paths, cfg)
                 if (cfg["num_processes"] <= 1):
@@ -1075,28 +1083,27 @@ def run_pipeline_for_session_with_df(cfg):
 
     if (cfg['generate_fig']):
         data_params['resample_in_min'] = 30
-        data_params['resample_tag'] = f"{data_params['resample_in_min']}T"
-        for detthresh in [0.35, 0.5]:
-            data_params['detection_threshold_for_activity'] = detthresh
-            for snr in [3, 7]:
-                data_params['SNR_threshold_for_activity'] = snr
-                construct_activity_arr(cfg, data_params)
-                for group in ['', 'LF', 'HF']:
-                    for cfg['METRIC'] in ['CALLRATE', 'BOUTTIMEPERCENTAGE', 'ACTIVITYINDEX']:
-                        cfg['METRIC_TAG'] = METRIC_TAGS[cfg['METRIC']]
-                        cfg['COL_TAG'] = COLNAME_TAGS[cfg['METRIC']]
-                        cfg['UPPER_LIM'] = PLOT_UPPER_LIM[cfg['METRIC']]
-                        activity_df = shape_activity_array_into_grid(cfg, data_params, group)
-                        plot_activity_grid(activity_df, cfg, data_params, group, save=True)
-                        if data_params["site"] != "(Site not found in Field Records)":
-                            year = '2026'
-                            data_params['selection_of_dates'] = f'recover-{year}*'
-                            cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
-                            data_params['show_PST'] = False
-                            data_params['UPPER_LIM'] = cfg['UPPER_LIM']
-                            data_params['METRIC_TAG'] = cfg['METRIC_TAG']
-                            data_params['METRIC'] = cfg['METRIC']
-                            plot_cumulative_activity(cumulative_activity_df, data_params, group)
+        data_params['resample_tag'] = f"{data_params['resample_in_min']}min"
+        data_params['detection_threshold_for_activity'] = 0.35
+        for snr in [3, 7]:
+            data_params['SNR_threshold_for_activity'] = snr
+            construct_activity_arr(cfg, data_params)
+            for group in ['', 'LF', 'HF']:
+                for cfg['METRIC'] in ['CALLRATE', 'BOUTTIMEPERCENTAGE', 'ACTIVITYINDEX']:
+                    cfg['METRIC_TAG'] = METRIC_TAGS[cfg['METRIC']]
+                    cfg['COL_TAG'] = COLNAME_TAGS[cfg['METRIC']]
+                    cfg['UPPER_LIM'] = PLOT_UPPER_LIM[cfg['METRIC']]
+                    activity_df = shape_activity_array_into_grid(cfg, data_params, group)
+                    plot_activity_grid(activity_df, cfg, data_params, group, save=True)
+                    if data_params["site"] != "(Site not found in Field Records)":
+                        year = '2026'
+                        data_params['selection_of_dates'] = f'recover-{year}*'
+                        cumulative_activity_df = construct_cumulative_activity(data_params, cfg, group)
+                        data_params['show_PST'] = False
+                        data_params['UPPER_LIM'] = cfg['UPPER_LIM']
+                        data_params['METRIC_TAG'] = cfg['METRIC_TAG']
+                        data_params['METRIC'] = cfg['METRIC']
+                        plot_cumulative_activity(cumulative_activity_df, data_params, group)
 
     return bd_preds
 
@@ -1108,7 +1115,7 @@ def get_params_relevant_to_data(cfg, data_drive_num=8):
         data_params['cur_selection_of_dates'] = f'recover-{data_params["current_year_recovery"]}_detections/recover-{data_params["current_year_recovery"]}'
     else:
         data_params['cur_selection_of_dates'] = f'recover-{data_params["current_year_recovery"]}'
-    data_params["audiomoth_folder"] = f"UBNA_{cfg['sd_unit']}"
+    data_params["audiomoth_folder"] = get_sd_card_folder(cfg['sd_unit'])
     print(f"Searching for files from {cfg['recover_folder']} and {data_params['audiomoth_folder']}")
 
     cur_data_records = dd.read_csv(f'{Path(__file__).parent}/../output_dir/ubna_data_0{data_drive_num}_collected_audio_records.csv', dtype=str).compute()
@@ -1127,7 +1134,7 @@ def get_params_relevant_to_data(cfg, data_drive_num=8):
         data_params['output_dir'] = cfg["output_dir"] / cfg['site']
         data_params['site'] = cfg['site']
     else:
-        data_params['output_dir'] = cfg["output_dir"] / f"UBNA_{cfg['sd_unit']}"
+        data_params['output_dir'] = cfg["output_dir"] / data_params["audiomoth_folder"]
     print(f"Will save csv file to {data_params['output_dir']}")
 
     data_params['ref_audio_files'] = sorted(list(files_from_deployment_session["file_path"].apply(lambda x : Path(x)).values))
